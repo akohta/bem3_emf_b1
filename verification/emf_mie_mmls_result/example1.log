@@ -1,0 +1,80 @@
+ "ipw.txt" No.00 -- plane wave --
+wave length of incident beam in vacuum      :           1.064
+refractive index of surrounding             :            1.33
+incident beam power per unit area           :           0.001
+x-component of polarization coefficient     :      1+      0i
+y-component of polarization coefficient     :      0+      0i
+x-component of translation vector           :               0
+y-component of translation vector           :               0
+z-component of translation vector           :               0
+rotation parameter theta               [rad]:               0
+rotation parameter phi                 [rad]:               0
+
+--------- sphere data ---------
+sphere id 0
+  basic sampling number on sphere surface       :               32
+  division number of sphere surface     (per PI):                4
+  limit of order number l                       :               40
+  x-coordinate of sphere center                 :                0
+  y-coordinate of sphere center                 :                0
+  z-coordinate of sphere center                 :                0
+  layer id 0
+    radius of layer                             :              0.2
+    refractive index of layer                   :     1.6+      0I
+  layer id 1
+    radius of layer                             :              0.3
+    refractive index of layer                   :    0.06+      4I
+
+ "ipw.txt" No.00 -- plane wave, MKSA system --
+wave length of incident beam in vacuum   [m]:       1.064e-06
+refractive index of surrounding             :            1.33
+incident beam power per unit area    [W/m^2]:         1000000
+x-component of polarization coefficient     :      1+      0i
+y-component of polarization coefficient     :      0+      0i
+x-component of translation vector        [m]:               0
+y-component of translation vector        [m]:               0
+z-component of translation vector        [m]:               0
+rotation parameter theta               [rad]:               0
+rotation parameter phi                 [rad]:               0
+
+--------- sphere data, MKSA system ---------
+sphere id 0
+  basic sampling number on sphere surface       :               32
+  division number of sphere surface     (per PI):                4
+  limit of order number l                       :               40
+  x-coordinate of sphere center              [m]:                0
+  y-coordinate of sphere center              [m]:                0
+  z-coordinate of sphere center              [m]:                0
+  layer id 0
+    radius of layer                          [m]:            2e-07
+    refractive index of layer                   :     1.6+      0I
+  layer id 1
+    radius of layer                          [m]:            3e-07
+    refractive index of layer                   :    0.06+      4I
+
+Electromagnetic field at r=(  0.3, 0, 1.1 )
+Ex = -3.41075196287664e-02 +9.82771710032601e-03 I (=-2.09346363468775e+04 +6.03209162831626e+03 I [V/m](MKSA))
+Ey =  3.11464931260734e-18 -2.12322831386164e-18 I (= 1.91172068262898e-12 -1.30320272819249e-12 I [V/m](MKSA))
+Ez = -1.80381139241507e-03 +7.82741305006679e-03 I (=-1.10714985872838e+03 +4.80433779774909e+03 I [V/m](MKSA))
+Hx = -4.12223618269647e-18 +2.99585112139667e-18 I (=-6.71610670403177e-15 +4.88095657525666e-15 I [A/m](MKSA))
+Hy = -4.54125292552325e-02 +1.05648748104555e-02 I (=-7.39878499583203e+01 +1.72127028624893e+01 I [A/m](MKSA))
+Hz =  1.24159173997145e-18 -6.93890161833627e-19 I (= 2.02284930773621e-15 -1.13051270262349e-15 I [A/m](MKSA))
+Real electromagnetic field at t=0.001
+Ex = -3.40488901495880e-02 (=-2.08986505338027e+04 [V/m](MKSA))
+Ey =  3.10205688604055e-18 (= 1.90399165765824e-12 [V/m](MKSA))
+Ez = -1.75755738410746e-03 (=-1.07875990677513e+03 [V/m](MKSA))
+Hx = -4.10447316259473e-18 (=-6.68716650431932e-15 [A/m](MKSA))
+Hy = -4.53493495878617e-02 (=-7.38849151994221e+01 [A/m](MKSA))
+Hz =  1.23747252104829e-18 (= 2.01613811686818e-15 [A/m](MKSA))
+
+Radiation force and torque
+Mie coefficient
+sphere id  0, F=( -2.0660773537106e-19,-3.0824773221724e-19, 0.00079028699725996 )
+           0, N=( -2.5456735166526e-21, 2.5433345452697e-21,-1.6593404103408e-21 )
+           0, F=( -6.8916922309986e-31,-1.0282037589393e-30, 2.6361136718788e-15 ) [ N ](MKSA)
+           0, N=( -8.4914528325213e-39, 8.4836508637909e-39,-5.5349638260106e-39 ) [N m](MKSA)
+Surface integral
+sphere id  0, F=( -3.4224597844382e-20,-1.5483179307347e-19, 0.00079028699725996 )
+           0, N=(  4.3781465402223e-20, 1.0109470574378e-19, 6.4260786044146e-22 )
+           0, F=( -1.1416097013482e-31,-5.164632696446e-31, 2.6361136718788e-15 ) [ N ](MKSA)
+           0, N=(  1.4603924893342e-37, 3.3721564050748e-37, 2.1435090953538e-39 ) [N m](MKSA)

@@ -1,0 +1,29 @@
+-- multi-wave data --
+ "ipw.txt" No.00 -- plane wave --
+wave length of incident beam in vacuum      :           1.064
+refractive index of surrounding             :            1.33
+incident beam power per unit area           :           0.001
+x-component of polarization coefficient     :      1+      0i
+y-component of polarization coefficient     :      0+      0i
+x-component of translation vector           :               0
+y-component of translation vector           :               0
+z-component of translation vector           :               0
+rotation parameter theta               [rad]:             0.3
+rotation parameter phi                 [rad]:               0
+
+-- medium data --
+medium data file name                  : medium_data.txt
+medium (domain) id  1 refractive index :    0.06 +        4I
+
+-- mesh data --
+mesh data file name    : cone_m1.msh
+node number            :      893
+defined element number :     1818
+
+
+solve modified electromagnetic potential ( mEMP )
+  coefficient matrix          finished. Elapsed time :   111 (sec)
+  solve mEMP boundary value   finished. Elapsed time :    88 (sec)
+solve electromagnteic field
+  solve EH boundary value     finished. Elapsed time :     5 (sec)
+Total elapsed time : 204 (sec)
