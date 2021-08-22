@@ -61,7 +61,7 @@ The results of 'emf_mie_mmls' is in the folder 'emf_mie_mmls_result'.
 
 ## Example of analysis
 
-The additional analysis example is in the folder 'analysis_sample'.
+The additional example of analysis is in the folder 'analysis_sample'.
 This is the analysis result of plane wave scattering by cone shaped metal.
 The cone_m1_image.pdf is the visualization result of mesh data. 
 The I_example2.pdf is the visualization result of intensity distributions ( outputs of 'example2.out' ), using Gnuplot script gscript_example2_logcb.plt.  
