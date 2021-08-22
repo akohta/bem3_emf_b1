@@ -59,7 +59,7 @@ The I_example2.pdf is the visualization result of intensity distributions ( outp
 The results of 'emf_mie_mmls' is in the folder 'emf_mie_mmls_result'.
 
 
-## Analysis example
+## Example of analysis
 
 The additional analysis example is in the folder 'analysis_sample'.
 This is the analysis result of plane wave scattering by cone shaped metal.
