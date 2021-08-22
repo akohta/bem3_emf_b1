@@ -1,5 +1,5 @@
 # bem3_emf_b1
-This is the electromagnetic field analysis program for arbitrary object irradiated by arbitrary beams. 
+This is the three-dimensional electromagnetic field analysis program for arbitrary object irradiated by arbitrary beams. 
 This is based on boundary element method, the own developed numerical solution is used. 
 This is the full vector field three-dimensional analysis, the corner probrem free. 
 Intel Math Kernel Library is required. 
