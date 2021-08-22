@@ -50,13 +50,23 @@ The domain number ( Physical Surface ) 99 is assigned to the open region in Gmsh
 Please refre to the manual of Gmsh for detail of geometry file.  
 
 
-## Verification
+## Verifications
 
-The verification results using 'emf_mie_mmls' are in the folder 'verification'.
+### Verification 1  
+
+The verification results using 'emf_mie_mmls' are in the folder 'verification1'.
 This is the analysis result of plane wave scattering by the two-layered sphere.
 The sphere_m2_image.pdf is the visualization result of mesh data. 
 The I_example2.pdf is the visualization result of intensity distributions ( outputs of 'example2.out' ).
 The results of 'emf_mie_mmls' is in the folder 'emf_mie_mmls_result'.
+
+### Verification 2  
+
+The verification results using 'emf_mie_ms' are in the folder 'verification2'.
+This is the analysis result of plane wave scattering by three spheres.
+The sphere_m3_image.pdf is the visualization result of mesh data. 
+The I_example2.pdf is the visualization result of intensity distributions ( outputs of 'example2.out' ).
+The results of 'emf_mie_ms' is in the folder 'emf_mie_ms_result'.
 
 
 ## Example of analysis
