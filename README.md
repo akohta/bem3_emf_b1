@@ -22,7 +22,11 @@ The electromagnetic field analysis program "multi_fbeam" is used to analyze inci
    The sphere_m1_image.pdf is the visulalization result of the sphere_m1.msh ( using Gmsh ).
    The d3b1_bv_solver solves boundary integral equations with specified data, outputs them to binary file with the output datafile name.
    The ipw.txt is the sample of incident field data file, a plane-wave is defined in it. Please refer to the "multi_fbeam" for detail. 
-   This sample requires about 32GB of memory to solve boundary integral equations ( to run d3b1_bv_solver ).  
+   This sample requires about 32GB of memory to solve boundary integral equations ( to run d3b1_bv_solver ). 
+   The d3b1_bv_solver has optional arguments for rotation and translation of object. 
+   When the vector defining rotation axis is (rx, ry, rz), the rotation angle is theta, the translation vector is (tx, ty, tz), 
+   the arguments are './d3b1_bv_solver medium_data.txt sphere_m1.msh ex.dat rx ry rz theta tx ty tz'. 
+   Rodrigues' rotation formula is used.  
 
 3. type './example1.out' with a argument of datafile name outputed by d3b1_bv_solver.  
    For example, './example1.out ex.dat'. 
@@ -82,3 +86,4 @@ The I_example2.pdf is the visualization result of intensity distributions ( outp
 2. Three-dimensional mesh generator [Gmsh](https://gmsh.info/)
 3. The electromagnetic field analysis program [multi_fbeam](https://github.com/akohta/multi_fbeam/) 
 4. The electromagnetic field analysis program [emf_mie_mmls](https://github.com/akohta/emf_mie_mmls/)
+5. The electromagnetic field analysis program [emf_mie_ms](https://github.com/akohta/emf_mie_ms/)
