@@ -7,6 +7,8 @@
 
 #include "bem3_emf_b1.h"
 
+void rotation_translation_obj(double *rv,double th,double *tv,DOMD *md);
+
 void filename_chk(int argc,char **argv);
 void read_medium_data(char *med_fn,DOMD *md);
 void print_medium_data(DOMD *md);
@@ -33,11 +35,30 @@ void read_domd(int argc,char **argv,DOMD *md)
   read_data_mfb(&(md->mw));
   read_medium_data(argv[1],md);
   read_mesh_data(argv[2],md);
+  
+  if(argc==11){
+    md->rv[0]=atof(argv[ 4]);
+    md->rv[1]=atof(argv[ 5]);
+    md->rv[2]=atof(argv[ 6]);
+    md->th   =atof(argv[ 7]);
+    md->tv[0]=atof(argv[ 8]);
+    md->tv[1]=atof(argv[ 9]);
+    md->tv[2]=atof(argv[10]);
+  }
+  else {
+    md->rv[0]=1.0;
+    md->rv[1]=0.0;
+    md->rv[2]=0.0;
+    md->th=0.0;
+    md->tv[0]=0.0;
+    md->tv[1]=0.0;
+    md->tv[2]=0.0;
+  }
 }
 
 void print_domd(DOMD *md)
 {
-  printf("-- multi-wave data --\n");
+  printf("-- multi_fbeam data --\n");
   print_data_mfb(&(md->mw));
 
   print_medium_data(md);
@@ -45,11 +66,23 @@ void print_domd(DOMD *md)
 
   print_mesh_data(md);
   printf("\n");
+  
+  if(md->th!=0.0 || vabs_d(md->tv)!=0.0){
+    printf("-- rotation and translation settings --\n");
+    if(md->th!=0.0){
+      printf("vector defining rotation axis :(% 8.7g,% 8.7g,% 8.7g)\n",md->rv[0],md->rv[1],md->rv[2]);
+      printf("rotation angle           [rad]: %8.7g\n",md->th);
+    }
+    if(vabs_d(md->tv)!=0.0){
+      printf("translation vector            :(%8.7g,%8.7g,%8.7g)\n",md->tv[0],md->tv[1],md->tv[2]);
+    }
+  }
+  printf("\n");
 }
 
 void print_domd_mksa(DOMD *md)
 {
-  printf("-- multi-wave data --\n");
+  printf("-- multi_fbeam data --\n");
   print_data_mfb_mksa(&(md->mw));
 
   print_medium_data(md);
@@ -57,6 +90,18 @@ void print_domd_mksa(DOMD *md)
 
   print_mesh_data(md);
   printf("\n");
+  
+  if(md->th!=0.0 || vabs_d(md->tv)!=0.0){
+    printf("-- rotation and translation settings --\n");
+    if(md->th!=0.0){
+      printf("vector defining rotation axis :(% 8.7g,% 8.7g,% 8.7g)\n",md->rv[0],md->rv[1],md->rv[2]);
+      printf("rotation angle           [rad]: %8.7g\n",md->th);
+    }
+    if(vabs_d(md->tv)!=0.0){
+      printf("translation vector         [m]:(%8.7g,%8.7g,%8.7g)\n",OSUtoMKSA_length(md->tv[0]),OSUtoMKSA_length(md->tv[1]),OSUtoMKSA_length(md->tv[2]));
+    }
+  }
+  printf("\n");  
 }
 
 void initialize_domd(DOMD *md)
@@ -68,6 +113,8 @@ void initialize_domd(DOMD *md)
   // medium
   md->n[0]=md->mw.n_0;  
   for(i=0;i<=md->MN;i++) md->kn[i]=2.0*M_PI/md->mw.lambda_0*md->n[i];
+  // rotation and translation object
+  if(md->th!=0.0 || vabs_d(md->tv)!=0.0) rotation_translation_obj(md->rv,md->th,md->tv,md);  
   // element constant
   init_elem_const(&(md->bd));
   // sub domain
@@ -92,11 +139,42 @@ void finalize_domd(DOMD *md)
 
 
 /////////////////////////////////////////////////////////////////////////////
+void rotation_translation_obj(double *rv,double th,double *tv,DOMD *md)
+{
+  double ct,st,r[3],M[9],nv[3];
+  size_t s,i;
+
+  nv[0]=rv[0];
+  nv[1]=rv[1];
+  nv[2]=rv[2];
+  vuni_d(nv);
+
+  // rotation matrix
+  st=sin(th);
+  ct=cos(th);
+  M[0]=ct+nv[0]*nv[0]*(1.0-ct);
+  M[1]=nv[0]*nv[1]*(1.0-ct)-nv[2]*st;
+  M[2]=nv[2]*nv[0]*(1.0-ct)+nv[1]*st;
+  M[3]=nv[0]*nv[1]*(1.0-ct)+nv[2]*st;
+  M[4]=ct+nv[1]*nv[1]*(1.0-ct);
+  M[5]=nv[1]*nv[2]*(1.0-ct)-nv[0]*st;
+  M[6]=nv[2]*nv[0]*(1.0-ct)-nv[1]*st;
+  M[7]=nv[1]*nv[2]*(1.0-ct)+nv[0]*st;
+  M[8]=ct+nv[2]*nv[2]*(1.0-ct);
+
+  for(s=1;s<=md->bd.Nn;s++){
+    for(i=0;i<3;i++) r[i]=M[3*i+0]*md->bd.rn[s][0]+M[3*i+1]*md->bd.rn[s][1]+M[3*i+2]*md->bd.rn[s][2]+tv[i];
+    for(i=0;i<3;i++) md->bd.rn[s][i]=r[i];
+  }
+}
+
 void filename_chk(int argc,char **argv)
 {
-  if(argc!=4){
+  if(argc!=4 && argc!=11){
     printf("This program needs command line arguments as follows.\n");
-    printf("%s medium_datafile_name mesh_datafile_name output_datafile_name\n",argv[0]);
+    printf("%s medium_datafile_name mesh_datafile_name output_datafile_name [rv_x rv_y rv_z theta tr_x tr_y tr_z ](optional)\n",argv[0]);
+    printf("rv : vector defining rotation axis, theta : rotation angle ( using Rodrigues' rotation formula ), tr : translation vector\n"); 
+    printf("Exit...\n");
     exit(0);
   }
 }
@@ -740,8 +818,8 @@ int domain_id(double *rt,DOMD *md)
           for(k=0;k<3;k++) rv[j][k]=md->bd.rn[md->bd.ed[md->bd.sb[d].sid[i]][j]][k]-rt[k];
         omega=fid_calc_solid_angle(check_element_type(md->bd.sb[d].sid[i],&(md->bd)),rv,&flg);
         if(flg<0){ // on boundary
-        	free(Og);
-        	return d;
+          free(Og);
+          return d;
         }
         Og[d]+=omega;
         Og[md->bd.sd[md->bd.sb[d].sid[i]]]-=omega;
@@ -749,12 +827,12 @@ int domain_id(double *rt,DOMD *md)
       } // end if
     }
     if(d==0 && fabs(Og[d])<2.0*M_PI){ // opened region
-    	free(Og);
-    	return d;
+      free(Og);
+      return d;
     }
     else if(Og[d]>2.0*M_PI){ // closed region
-    	free(Og);
-    	return d;
+      free(Og);
+      return d;
     }
   }
 
@@ -764,116 +842,124 @@ int domain_id(double *rt,DOMD *md)
 
 void dat_read_domd(char *fname,DOMD *md)
 {
-	FILE *fp;
-	int i,j,d,tmp;
+  FILE *fp;
+  int i,j,d,tmp;
 
-	if((fp=fopen(fname,"rb"))==NULL){    printf("dat_read(), Failed to open the %s file.\n",fname);    exit(1);  }
+  if((fp=fopen(fname,"rb"))==NULL){    printf("dat_read(), Failed to open the %s file.\n",fname);    exit(1);  }
 
-	// fname
-	fread(md->med_fn,sizeof(char),128,fp);
-	fread(md->msh_fn,sizeof(char),128,fp);
-	// material def
-	fread(&(md->MN),sizeof(int),1,fp);
-	md->n =(double complex *)m_alloc2(md->MN+1,sizeof(double complex),"read_medium_data(), md->n"); // malloc
-	md->kn=(double complex *)m_alloc2(md->MN+1,sizeof(double complex),"read_medium_data(),md->kn"); // malloc
-	fread(md->n,sizeof(double complex),md->MN+1,fp);
-	fread(md->kn,sizeof(double complex),md->MN+1,fp);
-	// multi_wave_nt
-	fread(&(md->mw),sizeof(Bobj),1,fp);
-	md->mw.bd.ipw=(Ipw *)m_alloc2(md->mw.n_ipw,sizeof(Ipw),"setup.c,dat_read(),md->mw.bd.ipw"); // malloc
-	md->mw.bd.fpw=(Fpw *)m_alloc2(md->mw.n_fpw,sizeof(Fpw),"setup.c,dat_read(),md->mw.bd.fpw"); // malloc
-	md->mw.bd.lgb=(LGb *)m_alloc2(md->mw.n_lgb,sizeof(LGb),"setup.c,dat_read(),md->mw.bd.lgb"); // malloc
-	md->mw.bd.bsb=(Bsb *)m_alloc2(md->mw.n_bsb,sizeof(Bsb),"setup.c,dat_read(),md->mw.bd.bsb"); // malloc
-	md->mw.bd.blg=(BsLGb *)m_alloc2(md->mw.n_blg,sizeof(BsLGb),"setup.c,dat_read(),md->mw.bd.blg"); // malloc
-	md->mw.bd.rab=(RAb *)m_alloc2(md->mw.n_rab,sizeof(RAb),"setup.c,dat_read(),md->mw.bd.rab"); // malloc
-	fread(md->mw.bd.ipw,sizeof(Ipw),md->mw.n_ipw,fp);
-	fread(md->mw.bd.fpw,sizeof(Fpw),md->mw.n_fpw,fp);
-	fread(md->mw.bd.lgb,sizeof(LGb),md->mw.n_lgb,fp);
-	fread(md->mw.bd.bsb,sizeof(Bsb),md->mw.n_bsb,fp);
-	fread(md->mw.bd.blg,sizeof(BsLGb),md->mw.n_blg,fp);
-	fread(md->mw.bd.rab,sizeof(RAb),md->mw.n_rab,fp);
-	setup_mfb(&(md->mw)); // setup multi_wave
-	// BOUD
-	fread(&(md->bd.Nn),sizeof(int),1,fp);
-	fread(&(md->bd.Ne),sizeof(int),1,fp);
-	malloc_node(&(md->bd)); // malloc
-	malloc_elem(&(md->bd)); // malloc
-	for(i=0;i<=md->bd.Nn;i++) fread(md->bd.rn[i],sizeof(double),3,fp);
-	for(i=0;i<=md->bd.Ne;i++) fread(md->bd.ed[i],sizeof(int),4,fp);
-	fread(&(md->bd.NN),sizeof(int),1,fp);
-	for(i=0;i<=md->bd.Ne;i++) fread(md->bd.eni[i],sizeof(int),4,fp);
-	fread(md->bd.md,sizeof(int),md->bd.Ne+1,fp);
-	fread(md->bd.sd,sizeof(int),md->bd.Ne+1,fp);
-	fread(md->bd.gd,sizeof(int),md->bd.Ne+1,fp);
-	for(i=0;i<=md->bd.Ne;i++) for(j=0;j<4;j++) fread(md->bd.ren[i][j],sizeof(double),3,fp);
-	for(i=0;i<=md->bd.Ne;i++) for(j=0;j<4;j++) fread(md->bd.wen[i][j],sizeof(double),3,fp);
-	for(i=0;i<=md->bd.Ne;i++) for(j=0;j<4;j++) fread(md->bd. Ui[i][j],sizeof(double complex),4,fp);
-	for(i=0;i<=md->bd.Ne;i++) for(j=0;j<4;j++) fread(md->bd.dUi[i][j],sizeof(double complex),4,fp);
-	init_elem_const(&(md->bd)); // setup
-	// sub domain data
-	malloc_sub_domain(md); // malloc
-	for(d=0;d<=md->MN;d++){
-		fread(&tmp,sizeof(int),1,fp);
-		fread(md->bd.sb[d].sid,sizeof(int),md->bd.sb[d].Ne+1,fp);
-		for(i=0;i<=md->bd.sb[d].Ne;i++) for(j=0;j<4;j++) fread(md->bd.sb[d]. U[i][j],sizeof(double complex),4,fp);
-		for(i=0;i<=md->bd.sb[d].Ne;i++) for(j=0;j<4;j++) fread(md->bd.sb[d].dU[i][j],sizeof(double complex),4,fp);
-		for(i=0;i<=md->bd.sb[d].Ne;i++) for(j=0;j<4;j++) fread(md->bd.sb[d]. E[i][j],sizeof(double complex),3,fp);
-		for(i=0;i<=md->bd.sb[d].Ne;i++) for(j=0;j<4;j++) fread(md->bd.sb[d].dE[i][j],sizeof(double complex),3,fp);
-		for(i=0;i<=md->bd.sb[d].Ne;i++) for(j=0;j<4;j++) fread(md->bd.sb[d]. H[i][j],sizeof(double complex),3,fp);
-		for(i=0;i<=md->bd.sb[d].Ne;i++) for(j=0;j<4;j++) fread(md->bd.sb[d].dH[i][j],sizeof(double complex),3,fp);
-	}
+  // fname
+  fread(md->med_fn,sizeof(char),128,fp);
+  fread(md->msh_fn,sizeof(char),128,fp);
+  // rotation and translation data
+  fread(md->rv,sizeof(double),3,fp);
+  fread(&(md->th),sizeof(double),1,fp);
+  fread(md->tv,sizeof(double),3,fp);
+  // material def
+  fread(&(md->MN),sizeof(int),1,fp);
+  md->n =(double complex *)m_alloc2(md->MN+1,sizeof(double complex),"read_medium_data(), md->n"); // malloc
+  md->kn=(double complex *)m_alloc2(md->MN+1,sizeof(double complex),"read_medium_data(),md->kn"); // malloc
+  fread(md->n,sizeof(double complex),md->MN+1,fp);
+  fread(md->kn,sizeof(double complex),md->MN+1,fp);
+  // multi_wave_nt
+  fread(&(md->mw),sizeof(Bobj),1,fp);
+  md->mw.bd.ipw=(Ipw *)m_alloc2(md->mw.n_ipw,sizeof(Ipw),"setup.c,dat_read(),md->mw.bd.ipw"); // malloc
+  md->mw.bd.fpw=(Fpw *)m_alloc2(md->mw.n_fpw,sizeof(Fpw),"setup.c,dat_read(),md->mw.bd.fpw"); // malloc
+  md->mw.bd.lgb=(LGb *)m_alloc2(md->mw.n_lgb,sizeof(LGb),"setup.c,dat_read(),md->mw.bd.lgb"); // malloc
+  md->mw.bd.bsb=(Bsb *)m_alloc2(md->mw.n_bsb,sizeof(Bsb),"setup.c,dat_read(),md->mw.bd.bsb"); // malloc
+  md->mw.bd.blg=(BsLGb *)m_alloc2(md->mw.n_blg,sizeof(BsLGb),"setup.c,dat_read(),md->mw.bd.blg"); // malloc
+  md->mw.bd.rab=(RAb *)m_alloc2(md->mw.n_rab,sizeof(RAb),"setup.c,dat_read(),md->mw.bd.rab"); // malloc
+  fread(md->mw.bd.ipw,sizeof(Ipw),md->mw.n_ipw,fp);
+  fread(md->mw.bd.fpw,sizeof(Fpw),md->mw.n_fpw,fp);
+  fread(md->mw.bd.lgb,sizeof(LGb),md->mw.n_lgb,fp);
+  fread(md->mw.bd.bsb,sizeof(Bsb),md->mw.n_bsb,fp);
+  fread(md->mw.bd.blg,sizeof(BsLGb),md->mw.n_blg,fp);
+  fread(md->mw.bd.rab,sizeof(RAb),md->mw.n_rab,fp);
+  setup_mfb(&(md->mw)); // setup multi_wave
+  // BOUD
+  fread(&(md->bd.Nn),sizeof(int),1,fp);
+  fread(&(md->bd.Ne),sizeof(int),1,fp);
+  malloc_node(&(md->bd)); // malloc
+  malloc_elem(&(md->bd)); // malloc
+  for(i=0;i<=md->bd.Nn;i++) fread(md->bd.rn[i],sizeof(double),3,fp);
+  for(i=0;i<=md->bd.Ne;i++) fread(md->bd.ed[i],sizeof(int),4,fp);
+  fread(&(md->bd.NN),sizeof(int),1,fp);
+  for(i=0;i<=md->bd.Ne;i++) fread(md->bd.eni[i],sizeof(int),4,fp);
+  fread(md->bd.md,sizeof(int),md->bd.Ne+1,fp);
+  fread(md->bd.sd,sizeof(int),md->bd.Ne+1,fp);
+  fread(md->bd.gd,sizeof(int),md->bd.Ne+1,fp);
+  for(i=0;i<=md->bd.Ne;i++) for(j=0;j<4;j++) fread(md->bd.ren[i][j],sizeof(double),3,fp);
+  for(i=0;i<=md->bd.Ne;i++) for(j=0;j<4;j++) fread(md->bd.wen[i][j],sizeof(double),3,fp);
+  for(i=0;i<=md->bd.Ne;i++) for(j=0;j<4;j++) fread(md->bd. Ui[i][j],sizeof(double complex),4,fp);
+  for(i=0;i<=md->bd.Ne;i++) for(j=0;j<4;j++) fread(md->bd.dUi[i][j],sizeof(double complex),4,fp);
+  init_elem_const(&(md->bd)); // setup
+  // sub domain data
+  malloc_sub_domain(md); // malloc
+  for(d=0;d<=md->MN;d++){
+    fread(&tmp,sizeof(int),1,fp);
+    fread(md->bd.sb[d].sid,sizeof(int),md->bd.sb[d].Ne+1,fp);
+    for(i=0;i<=md->bd.sb[d].Ne;i++) for(j=0;j<4;j++) fread(md->bd.sb[d]. U[i][j],sizeof(double complex),4,fp);
+    for(i=0;i<=md->bd.sb[d].Ne;i++) for(j=0;j<4;j++) fread(md->bd.sb[d].dU[i][j],sizeof(double complex),4,fp);
+    for(i=0;i<=md->bd.sb[d].Ne;i++) for(j=0;j<4;j++) fread(md->bd.sb[d]. E[i][j],sizeof(double complex),3,fp);
+    for(i=0;i<=md->bd.sb[d].Ne;i++) for(j=0;j<4;j++) fread(md->bd.sb[d].dE[i][j],sizeof(double complex),3,fp);
+    for(i=0;i<=md->bd.sb[d].Ne;i++) for(j=0;j<4;j++) fread(md->bd.sb[d]. H[i][j],sizeof(double complex),3,fp);
+    for(i=0;i<=md->bd.sb[d].Ne;i++) for(j=0;j<4;j++) fread(md->bd.sb[d].dH[i][j],sizeof(double complex),3,fp);
+  }
 
-	fclose(fp);
+  fclose(fp);
 }
 
 void dat_write_domd(char *fname,DOMD *md)
 {
-	FILE *fp;
-	int i,j,d;
+  FILE *fp;
+  int i,j,d;
 
-	if((fp=fopen(fname,"wb"))==NULL){    printf("dat_write(), Failed to create the %s file.\n",fname);    exit(1);  }
+  if((fp=fopen(fname,"wb"))==NULL){    printf("dat_write(), Failed to create the %s file.\n",fname);    exit(1);  }
 
-	// fname
-	fwrite(md->med_fn,sizeof(char),128,fp);
-	fwrite(md->msh_fn,sizeof(char),128,fp);
-	// material def
-	fwrite(&(md->MN),sizeof(int),1,fp);
-	fwrite(md->n,sizeof(double complex),md->MN+1,fp);
-	fwrite(md->kn,sizeof(double complex),md->MN+1,fp);
-	// multi_fbeam
-	fwrite(&(md->mw),sizeof(Bobj),1,fp);
-	fwrite(md->mw.bd.ipw,sizeof(Ipw),md->mw.n_ipw,fp);
-	fwrite(md->mw.bd.fpw,sizeof(Fpw),md->mw.n_fpw,fp);
-	fwrite(md->mw.bd.lgb,sizeof(LGb),md->mw.n_lgb,fp);
-	fwrite(md->mw.bd.bsb,sizeof(Bsb),md->mw.n_bsb,fp);
-	fwrite(md->mw.bd.blg,sizeof(BsLGb),md->mw.n_blg,fp);
-	fwrite(md->mw.bd.rab,sizeof(RAb),md->mw.n_rab,fp);
-	// BOUD
-	fwrite(&(md->bd.Nn),sizeof(int),1,fp);
-	fwrite(&(md->bd.Ne),sizeof(int),1,fp);
-	for(i=0;i<=md->bd.Nn;i++) fwrite(md->bd.rn[i],sizeof(double),3,fp);
-	for(i=0;i<=md->bd.Ne;i++) fwrite(md->bd.ed[i],sizeof(int),4,fp);
-	fwrite(&(md->bd.NN),sizeof(int),1,fp);
-	for(i=0;i<=md->bd.Ne;i++) fwrite(md->bd.eni[i],sizeof(int),4,fp);
-	fwrite(md->bd.md,sizeof(int),md->bd.Ne+1,fp);
-	fwrite(md->bd.sd,sizeof(int),md->bd.Ne+1,fp);
-	fwrite(md->bd.gd,sizeof(int),md->bd.Ne+1,fp);
-	for(i=0;i<=md->bd.Ne;i++) for(j=0;j<4;j++) fwrite(md->bd.ren[i][j],sizeof(double),3,fp);
-	for(i=0;i<=md->bd.Ne;i++) for(j=0;j<4;j++) fwrite(md->bd.wen[i][j],sizeof(double),3,fp);
-	for(i=0;i<=md->bd.Ne;i++) for(j=0;j<4;j++) fwrite(md->bd. Ui[i][j],sizeof(double complex),4,fp);
-	for(i=0;i<=md->bd.Ne;i++) for(j=0;j<4;j++) fwrite(md->bd.dUi[i][j],sizeof(double complex),4,fp);
-	// sub domain data
-	for(d=0;d<=md->MN;d++){
-		fwrite(&(md->bd.sb[d].Ne),sizeof(int),1,fp);
-		fwrite(md->bd.sb[d].sid,sizeof(int),md->bd.sb[d].Ne+1,fp);
-		for(i=0;i<=md->bd.sb[d].Ne;i++) for(j=0;j<4;j++) fwrite(md->bd.sb[d]. U[i][j],sizeof(double complex),4,fp);
-		for(i=0;i<=md->bd.sb[d].Ne;i++) for(j=0;j<4;j++) fwrite(md->bd.sb[d].dU[i][j],sizeof(double complex),4,fp);
-		for(i=0;i<=md->bd.sb[d].Ne;i++) for(j=0;j<4;j++) fwrite(md->bd.sb[d]. E[i][j],sizeof(double complex),3,fp);
-		for(i=0;i<=md->bd.sb[d].Ne;i++) for(j=0;j<4;j++) fwrite(md->bd.sb[d].dE[i][j],sizeof(double complex),3,fp);
-		for(i=0;i<=md->bd.sb[d].Ne;i++) for(j=0;j<4;j++) fwrite(md->bd.sb[d]. H[i][j],sizeof(double complex),3,fp);
-		for(i=0;i<=md->bd.sb[d].Ne;i++) for(j=0;j<4;j++) fwrite(md->bd.sb[d].dH[i][j],sizeof(double complex),3,fp);
-	}
+  // fname
+  fwrite(md->med_fn,sizeof(char),128,fp);
+  fwrite(md->msh_fn,sizeof(char),128,fp);
+  // rotation and translation data
+  fwrite(md->rv,sizeof(double),3,fp);
+  fwrite(&(md->th),sizeof(double),1,fp);
+  fwrite(md->tv,sizeof(double),3,fp);
+  // material def
+  fwrite(&(md->MN),sizeof(int),1,fp);
+  fwrite(md->n,sizeof(double complex),md->MN+1,fp);
+  fwrite(md->kn,sizeof(double complex),md->MN+1,fp);
+  // multi_fbeam
+  fwrite(&(md->mw),sizeof(Bobj),1,fp);
+  fwrite(md->mw.bd.ipw,sizeof(Ipw),md->mw.n_ipw,fp);
+  fwrite(md->mw.bd.fpw,sizeof(Fpw),md->mw.n_fpw,fp);
+  fwrite(md->mw.bd.lgb,sizeof(LGb),md->mw.n_lgb,fp);
+  fwrite(md->mw.bd.bsb,sizeof(Bsb),md->mw.n_bsb,fp);
+  fwrite(md->mw.bd.blg,sizeof(BsLGb),md->mw.n_blg,fp);
+  fwrite(md->mw.bd.rab,sizeof(RAb),md->mw.n_rab,fp);
+  // BOUD
+  fwrite(&(md->bd.Nn),sizeof(int),1,fp);
+  fwrite(&(md->bd.Ne),sizeof(int),1,fp);
+  for(i=0;i<=md->bd.Nn;i++) fwrite(md->bd.rn[i],sizeof(double),3,fp);
+  for(i=0;i<=md->bd.Ne;i++) fwrite(md->bd.ed[i],sizeof(int),4,fp);
+  fwrite(&(md->bd.NN),sizeof(int),1,fp);
+  for(i=0;i<=md->bd.Ne;i++) fwrite(md->bd.eni[i],sizeof(int),4,fp);
+  fwrite(md->bd.md,sizeof(int),md->bd.Ne+1,fp);
+  fwrite(md->bd.sd,sizeof(int),md->bd.Ne+1,fp);
+  fwrite(md->bd.gd,sizeof(int),md->bd.Ne+1,fp);
+  for(i=0;i<=md->bd.Ne;i++) for(j=0;j<4;j++) fwrite(md->bd.ren[i][j],sizeof(double),3,fp);
+  for(i=0;i<=md->bd.Ne;i++) for(j=0;j<4;j++) fwrite(md->bd.wen[i][j],sizeof(double),3,fp);
+  for(i=0;i<=md->bd.Ne;i++) for(j=0;j<4;j++) fwrite(md->bd. Ui[i][j],sizeof(double complex),4,fp);
+  for(i=0;i<=md->bd.Ne;i++) for(j=0;j<4;j++) fwrite(md->bd.dUi[i][j],sizeof(double complex),4,fp);
+  // sub domain data
+  for(d=0;d<=md->MN;d++){
+    fwrite(&(md->bd.sb[d].Ne),sizeof(int),1,fp);
+    fwrite(md->bd.sb[d].sid,sizeof(int),md->bd.sb[d].Ne+1,fp);
+    for(i=0;i<=md->bd.sb[d].Ne;i++) for(j=0;j<4;j++) fwrite(md->bd.sb[d]. U[i][j],sizeof(double complex),4,fp);
+    for(i=0;i<=md->bd.sb[d].Ne;i++) for(j=0;j<4;j++) fwrite(md->bd.sb[d].dU[i][j],sizeof(double complex),4,fp);
+    for(i=0;i<=md->bd.sb[d].Ne;i++) for(j=0;j<4;j++) fwrite(md->bd.sb[d]. E[i][j],sizeof(double complex),3,fp);
+    for(i=0;i<=md->bd.sb[d].Ne;i++) for(j=0;j<4;j++) fwrite(md->bd.sb[d].dE[i][j],sizeof(double complex),3,fp);
+    for(i=0;i<=md->bd.sb[d].Ne;i++) for(j=0;j<4;j++) fwrite(md->bd.sb[d]. H[i][j],sizeof(double complex),3,fp);
+    for(i=0;i<=md->bd.sb[d].Ne;i++) for(j=0;j<4;j++) fwrite(md->bd.sb[d].dH[i][j],sizeof(double complex),3,fp);
+  }
 
-	fclose(fp);
+  fclose(fp);
 }
 

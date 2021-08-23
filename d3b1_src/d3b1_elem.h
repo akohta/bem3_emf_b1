@@ -45,6 +45,8 @@ typedef struct boundary_data{
 
 typedef struct domain_data {
   char med_fn[128], msh_fn[128]; // medium_datafile_name , mesh data file name
+  double rv[3],th;               // rotation parameter, rv:vector defining rotation axis ( rotation center is origin ), th:rotation angle 
+  double tv[3];                  // translation vector. translation is applied after rotation.
 
   int MN;             // number of medium
   double complex *n;  // complex refractive index of medium
