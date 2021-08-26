@@ -3,8 +3,8 @@ This is the three-dimensional electromagnetic field analysis program for arbitra
 This is based on boundary element method, the own developed numerical solution is used. 
 This is the full vector field three-dimensional analysis, the corner probrem free. 
 Intel Math Kernel Library is required. 
-Gmsh is used to create a mesh data for object. 
-The electromagnetic field analysis program "multi_fbeam" is used to analyze incident field. 
+Gmsh is used for create a mesh data for object. 
+The electromagnetic field analysis program "multi_fbeam" is used for analyze incident field. 
 
 ## Usage of example code
 
@@ -51,7 +51,7 @@ The file with extension '.geo' is the Gmsh geometry file.
 The file with extension '.msh' is the mesh file created from Gmsh geometry file. 
 These mesh files are created by the command 'gmsh -2 -tol 1.0e-15 xxxx.geo' in command line ( xxxx.geo is a geometry file). 
 The domain number ( Physical Surface ) 99 is assigned to the open region in Gmsh geometry file, becase Gmsh can't use the number 0 ( assigned to open region in the code). 
-Please refre to the manual of Gmsh for detail of geometry file.  
+Please refer to the manual of Gmsh for detail of geometry file.  
 
 
 ## Verifications
