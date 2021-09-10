@@ -1,4 +1,6 @@
--- multi-wave data --
+../d3b1_bv_solver medium_data.txt sphere_m2.msh v1.dat
+
+-- multi_fbeam data --
  "ipw.txt" No.00 -- plane wave --
 wave length of incident beam in vacuum      :           1.064
 refractive index of surrounding             :            1.33
@@ -22,9 +24,10 @@ node number            :     1090
 defined element number :     2172
 
 
+
 solve modified electromagnetic potential ( mEMP )
-  coefficient matrix          finished. Elapsed time :   116 (sec)
-  solve mEMP boundary value   finished. Elapsed time :   116 (sec)
+  coefficient matrix          finished. Elapsed time :    76 (sec)
+  solve mEMP boundary value   finished. Elapsed time :   105 (sec)
 solve electromagnteic field
-  solve EH boundary value     finished. Elapsed time :     6 (sec)
-Total elapsed time : 239 (sec)
+  solve EH boundary value     finished. Elapsed time :     4 (sec)
+Total elapsed time : 186 (sec)

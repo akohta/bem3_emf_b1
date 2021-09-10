@@ -1,3 +1,5 @@
+../example1.out v2.dat
+
 -- multi-wave data --
  "ipw.txt" No.00 -- plane wave --
 wave length of incident beam in vacuum      :           1.064

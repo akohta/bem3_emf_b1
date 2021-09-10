@@ -1,4 +1,4 @@
-../d3b1_bv_solver medium_data.txt sphere_m3.msh v2.dat
+./d3b1_bv_solver medium_data.txt sphere_m1.msh ex.dat
 
 -- multi_fbeam data --
  "ipw.txt" No.00 -- plane wave --
@@ -15,18 +15,19 @@ rotation parameter phi                 [rad]:               0
 
 -- medium data --
 medium data file name                  : medium_data.txt
-medium (domain) id  1 refractive index :     1.6 +    1e-06I
+medium (domain) id  1 refractive index :     1.6 +        0I
+medium (domain) id  2 refractive index :    0.06 +        4I
 
 -- mesh data --
-mesh data file name    : sphere_m3.msh
-node number            :     1158
-defined element number :     2304
+mesh data file name    : sphere_m1.msh
+node number            :     1179
+defined element number :     2400
 
 
 
 solve modified electromagnetic potential ( mEMP )
-  coefficient matrix          finished. Elapsed time :    92 (sec)
-  solve mEMP boundary value   finished. Elapsed time :   163 (sec)
+  coefficient matrix          finished. Elapsed time :    70 (sec)
+  solve mEMP boundary value   finished. Elapsed time :   135 (sec)
 solve electromagnteic field
-  solve EH boundary value     finished. Elapsed time :    14 (sec)
-Total elapsed time : 270 (sec)
+  solve EH boundary value     finished. Elapsed time :     4 (sec)
+Total elapsed time : 210 (sec)
