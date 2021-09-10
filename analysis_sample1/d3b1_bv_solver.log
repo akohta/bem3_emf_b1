@@ -1,6 +1,6 @@
-../d3b1_bv_solver medium_data.txt sphere_m3.msh v2.dat
+../d3b1_bv_solver medium_data.txt cone_m1.msh ex1.dat
 
--- multi_fbeam data --
+-- multi-wave data --
  "ipw.txt" No.00 -- plane wave --
 wave length of incident beam in vacuum      :           1.064
 refractive index of surrounding             :            1.33
@@ -10,23 +10,22 @@ y-component of polarization coefficient     :      0+      0i
 x-component of translation vector           :               0
 y-component of translation vector           :               0
 z-component of translation vector           :               0
-rotation parameter theta               [rad]:               0
+rotation parameter theta               [rad]:             0.3
 rotation parameter phi                 [rad]:               0
 
 -- medium data --
 medium data file name                  : medium_data.txt
-medium (domain) id  1 refractive index :     1.6 +    1e-06I
+medium (domain) id  1 refractive index :    0.06 +        4I
 
 -- mesh data --
-mesh data file name    : sphere_m3.msh
-node number            :     1158
-defined element number :     2304
-
+mesh data file name    : cone_m1.msh
+node number            :      893
+defined element number :     1818
 
 
 solve modified electromagnetic potential ( mEMP )
-  coefficient matrix          finished. Elapsed time :    92 (sec)
-  solve mEMP boundary value   finished. Elapsed time :   163 (sec)
+  coefficient matrix          finished. Elapsed time :    67 (sec)
+  solve mEMP boundary value   finished. Elapsed time :    77 (sec)
 solve electromagnteic field
-  solve EH boundary value     finished. Elapsed time :    14 (sec)
-Total elapsed time : 270 (sec)
+  solve EH boundary value     finished. Elapsed time :     3 (sec)
+Total elapsed time : 148 (sec)

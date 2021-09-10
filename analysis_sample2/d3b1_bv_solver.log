@@ -1,4 +1,6 @@
--- multi-wave data --
+../d3b1_bv_solver medium_data.txt cone_m1.msh ex2.dat 1 0 0 3.14159265 0 0 0
+
+-- multi_fbeam data --
  "ipw.txt" No.00 -- plane wave --
 wave length of incident beam in vacuum      :           1.064
 refractive index of surrounding             :            1.33
@@ -20,10 +22,15 @@ mesh data file name    : cone_m1.msh
 node number            :      893
 defined element number :     1818
 
+-- rotation and translation settings --
+vector defining rotation axis :(       1,       0,       0)
+rotation angle           [rad]: 3.141593
+
 
 solve modified electromagnetic potential ( mEMP )
-  coefficient matrix          finished. Elapsed time :   111 (sec)
-  solve mEMP boundary value   finished. Elapsed time :    88 (sec)
+  coefficient matrix          finished. Elapsed time :    70 (sec)
+  solve mEMP boundary value   finished. Elapsed time :    75 (sec)
 solve electromagnteic field
-  solve EH boundary value     finished. Elapsed time :     5 (sec)
-Total elapsed time : 204 (sec)
+  solve EH boundary value     finished. Elapsed time :     4 (sec)
+Total elapsed time : 149 (sec)
+
