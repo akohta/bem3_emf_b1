@@ -18,15 +18,17 @@ The electromagnetic field analysis program "multi_fbeam" is used for analyze inc
    For example, './d3b1_bv_solver medium_data.txt sphere_m1.msh ex.dat'. 
    The medium_data.txt is the sample of medium datafile, two mediums are defined in it. The domain numbers are assigned to the medium from 1 in order. 
    The sphere_m1.msh is the example of mesh datafile, it is a sphere consists of two hemispheres.
-   It was created by Gmsh geometry file sphere_m1.geo in mesh_sample folder. 
+   It was created by Gmsh geometry file sphere_m1.geo in the mesh_sample folder. 
    The sphere_m1_image.png is the visulalization result of the sphere_m1.msh.
    The d3b1_bv_solver solves boundary integral equations with the specified datafile, outputs the results to binary file with the output datafile name.
    The ipw.txt is the sample of incident field datafile, a plane-wave is defined in it. Please refer to "multi_fbeam" for detail. 
    This sample requires about 32GB of memory to solve boundary integral equations (required to run d3b1_bv_solver). 
-   The d3b1_bv_solver has optional arguments for rotation and translation of object. 
+   The d3b1_bv_solver has optional arguments for rotation and translation of the object. 
    When the vector defining rotation axis is (rx, ry, rz), the rotation angle is theta, the translation vector is (tx, ty, tz), 
    the arguments are './d3b1_bv_solver medium_data.txt sphere_m1.msh ex.dat rx ry rz theta tx ty tz'. 
-   Rodrigues' rotation formula is used.  
+   Rodrigues' rotation formula is used. 
+   As a simple representation of the analysis model, the nodes used for the surface integral are output as point cloud data. 
+   In this example, the file "ex.particles" is output, and the visualization result is "ex_particle.png" (using ParaView).
 
 3. type './example1.out' with a argument of datafile name outputed by d3b1_bv_solver.  
    For example, './example1.out ex.dat'. 
@@ -38,6 +40,7 @@ The electromagnetic field analysis program "multi_fbeam" is used for analyze inc
    The I_example2.png is the visualization result of intensity distributions, created by Gnuplot script gscript_example2.plt.  
 
 ![mesh 0](sphere_m1_image.png "mesh image of the object (sphere_m1_image.png)")  
+![point cloud data 0](ex_particles.png "nodes for surface integral (ex_particles.png)") 
 ![intensity distributions 0](I_example2.png "intensity distributions (I_example2.png)")
 
 Please see d3b1_src/bem3_emf_b1.h for detail of functions. 
@@ -53,6 +56,7 @@ The cone_m1_image.png is the visualization result of mesh datafile.
 The I_example2.png is the visualization result of intensity distributions, using Gnuplot script gscript_example2_logcb.plt.  
 
 ![mesh 1](analysis_sample1/cone_m1_image.png "mesh image of the cone (analysis_sample1/cone_m1_image.png)")  
+![point cloud data 1](analysis_sample1/ex1_particles.png "nodes for surface integral (analysis_sample1/ex1_particles.png)") 
 ![intensity distributions 1](analysis_sample1/I_example2.png "intensity distributions (analysis_sample1/I_example2.png)")  
 
 
@@ -98,3 +102,4 @@ Please refer to the manual of Gmsh for detail of geometry file.
 3. The electromagnetic field analysis program [multi_fbeam](https://github.com/akohta/multi_fbeam/)   
 4. The electromagnetic field analysis program [emf_mie_mmls](https://github.com/akohta/emf_mie_mmls/)  
 5. The electromagnetic field analysis program [emf_mie_ms](https://github.com/akohta/emf_mie_ms/)  
+6. The data analysis and visualization application [ParaView](https://www.paraview.org/)  
