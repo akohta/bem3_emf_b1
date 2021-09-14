@@ -7,28 +7,12 @@
 
 #include "bem3_emf_b1.h"
 
-void rotation_translation_obj(double *rv,double th,double *tv,DOMD *md);
-
-void filename_chk(int argc,char **argv);
-void read_medium_data(char *med_fn,DOMD *md);
-void print_medium_data(DOMD *md);
-void read_mesh_data(char *msh_fn,DOMD *md);
-void print_mesh_data(DOMD *md);
-
-void malloc_node(BOUD *bd);
-void mfree_node(BOUD *bd);
-void malloc_elem(BOUD *bd);
-void mfree_elem(BOUD *bd);
-
-void init_elem_const(BOUD *bd);
-void malloc_sub_domain(DOMD *md);
-void mfree_sub_domain(DOMD *md);
-void init_sub_domain(DOMD *md);
-void init_boundary_data(DOMD *md);
-
-
 void read_domd(int argc,char **argv,DOMD *md)
 {
+  void filename_chk(int argc,char **argv);
+  void read_medium_data(char *med_fn,DOMD *md);
+  void read_mesh_data(char *msh_fn,DOMD *md);
+  
   filename_chk(argc,argv);
   // multi_wave
   init_mfb(&(md->mw));
@@ -58,6 +42,9 @@ void read_domd(int argc,char **argv,DOMD *md)
 
 void print_domd(DOMD *md)
 {
+  void print_medium_data(DOMD *md);
+  void print_mesh_data(DOMD *md);
+  
   printf("-- multi_fbeam data --\n");
   print_data_mfb(&(md->mw));
 
@@ -82,6 +69,9 @@ void print_domd(DOMD *md)
 
 void print_domd_mksa(DOMD *md)
 {
+  void print_medium_data(DOMD *md);
+  void print_mesh_data(DOMD *md);
+  
   printf("-- multi_fbeam data --\n");
   print_data_mfb_mksa(&(md->mw));
 
@@ -106,6 +96,12 @@ void print_domd_mksa(DOMD *md)
 
 void initialize_domd(DOMD *md)
 {
+  void rotation_translation_obj(double *rv,double th,double *tv,DOMD *md);
+  void init_elem_const(BOUD *bd);
+  void malloc_sub_domain(DOMD *md);
+  void init_sub_domain(DOMD *md);
+  void init_boundary_data(DOMD *md);
+  
   int i;
 
   // multi_wave
@@ -126,6 +122,10 @@ void initialize_domd(DOMD *md)
 
 void finalize_domd(DOMD *md)
 {
+  void mfree_node(BOUD *bd);
+  void mfree_elem(BOUD *bd);
+  void mfree_sub_domain(DOMD *md);
+  
   mfree_sub_domain(md);
 
   mfree_elem(&(md->bd));
@@ -137,6 +137,200 @@ void finalize_domd(DOMD *md)
 
 }
 
+int domain_id(double *rt,DOMD *md)
+{
+  double fid_calc_solid_angle(int type,double r[4][3],int *flg);
+  
+  double rv[4][3],omega;
+  double *Og=(double *)m_alloc2(md->MN+1,sizeof(double),"b_utils.c, domain_id()");
+  int i,j,k,d,flg;
+
+  for(d=0;d<md->MN+1;d++){
+    for(i=1;i<=md->bd.sb[d].Ne;i++){
+      if(md->bd.sb[d].sid[i]>0){
+        // read node data
+        for(j=0;j<4;j++)
+          for(k=0;k<3;k++) rv[j][k]=md->bd.rn[md->bd.ed[md->bd.sb[d].sid[i]][j]][k]-rt[k];
+        omega=fid_calc_solid_angle(check_element_type(md->bd.sb[d].sid[i],&(md->bd)),rv,&flg);
+        if(flg<0){ // on boundary
+          free(Og);
+          return d;
+        }
+        Og[d]+=omega;
+        Og[md->bd.sd[md->bd.sb[d].sid[i]]]-=omega;
+
+      } // end if
+    }
+    if(d==0 && fabs(Og[d])<2.0*M_PI){ // opened region
+      free(Og);
+      return d;
+    }
+    else if(Og[d]>2.0*M_PI){ // closed region
+      free(Og);
+      return d;
+    }
+  }
+
+  free(Og);
+  return -1; // error
+}
+
+void dat_read_domd(char *fname,DOMD *md)
+{
+  void malloc_node(BOUD *bd);
+  void malloc_elem(BOUD *bd);
+  void init_elem_const(BOUD *bd);
+  void malloc_sub_domain(DOMD *md);
+  
+  FILE *fp;
+  int i,j,d,tmp;
+
+  if((fp=fopen(fname,"rb"))==NULL){    printf("dat_read(), Failed to open the %s file.\n",fname);    exit(1);  }
+
+  // fname
+  fread(md->med_fn,sizeof(char),128,fp);
+  fread(md->msh_fn,sizeof(char),128,fp);
+  // rotation and translation data
+  fread(md->rv,sizeof(double),3,fp);
+  fread(&(md->th),sizeof(double),1,fp);
+  fread(md->tv,sizeof(double),3,fp);
+  // material def
+  fread(&(md->MN),sizeof(int),1,fp);
+  md->n =(double complex *)m_alloc2(md->MN+1,sizeof(double complex),"read_medium_data(), md->n"); // malloc
+  md->kn=(double complex *)m_alloc2(md->MN+1,sizeof(double complex),"read_medium_data(),md->kn"); // malloc
+  fread(md->n,sizeof(double complex),md->MN+1,fp);
+  fread(md->kn,sizeof(double complex),md->MN+1,fp);
+  // multi_wave_nt
+  fread(&(md->mw),sizeof(Bobj),1,fp);
+  md->mw.bd.ipw=(Ipw *)m_alloc2(md->mw.n_ipw,sizeof(Ipw),"setup.c,dat_read(),md->mw.bd.ipw"); // malloc
+  md->mw.bd.fpw=(Fpw *)m_alloc2(md->mw.n_fpw,sizeof(Fpw),"setup.c,dat_read(),md->mw.bd.fpw"); // malloc
+  md->mw.bd.lgb=(LGb *)m_alloc2(md->mw.n_lgb,sizeof(LGb),"setup.c,dat_read(),md->mw.bd.lgb"); // malloc
+  md->mw.bd.bsb=(Bsb *)m_alloc2(md->mw.n_bsb,sizeof(Bsb),"setup.c,dat_read(),md->mw.bd.bsb"); // malloc
+  md->mw.bd.blg=(BsLGb *)m_alloc2(md->mw.n_blg,sizeof(BsLGb),"setup.c,dat_read(),md->mw.bd.blg"); // malloc
+  md->mw.bd.rab=(RAb *)m_alloc2(md->mw.n_rab,sizeof(RAb),"setup.c,dat_read(),md->mw.bd.rab"); // malloc
+  fread(md->mw.bd.ipw,sizeof(Ipw),md->mw.n_ipw,fp);
+  fread(md->mw.bd.fpw,sizeof(Fpw),md->mw.n_fpw,fp);
+  fread(md->mw.bd.lgb,sizeof(LGb),md->mw.n_lgb,fp);
+  fread(md->mw.bd.bsb,sizeof(Bsb),md->mw.n_bsb,fp);
+  fread(md->mw.bd.blg,sizeof(BsLGb),md->mw.n_blg,fp);
+  fread(md->mw.bd.rab,sizeof(RAb),md->mw.n_rab,fp);
+  setup_mfb(&(md->mw)); // setup multi_wave
+  // BOUD
+  fread(&(md->bd.Nn),sizeof(int),1,fp);
+  fread(&(md->bd.Ne),sizeof(int),1,fp);
+  malloc_node(&(md->bd)); // malloc
+  malloc_elem(&(md->bd)); // malloc
+  for(i=0;i<=md->bd.Nn;i++) fread(md->bd.rn[i],sizeof(double),3,fp);
+  for(i=0;i<=md->bd.Ne;i++) fread(md->bd.ed[i],sizeof(int),4,fp);
+  fread(&(md->bd.NN),sizeof(int),1,fp);
+  for(i=0;i<=md->bd.Ne;i++) fread(md->bd.eni[i],sizeof(int),4,fp);
+  fread(md->bd.md,sizeof(int),md->bd.Ne+1,fp);
+  fread(md->bd.sd,sizeof(int),md->bd.Ne+1,fp);
+  fread(md->bd.gd,sizeof(int),md->bd.Ne+1,fp);
+  for(i=0;i<=md->bd.Ne;i++) for(j=0;j<4;j++) fread(md->bd.ren[i][j],sizeof(double),3,fp);
+  for(i=0;i<=md->bd.Ne;i++) for(j=0;j<4;j++) fread(md->bd.wen[i][j],sizeof(double),3,fp);
+  for(i=0;i<=md->bd.Ne;i++) for(j=0;j<4;j++) fread(md->bd. Ui[i][j],sizeof(double complex),4,fp);
+  for(i=0;i<=md->bd.Ne;i++) for(j=0;j<4;j++) fread(md->bd.dUi[i][j],sizeof(double complex),4,fp);
+  init_elem_const(&(md->bd)); // setup
+  // sub domain data
+  malloc_sub_domain(md); // malloc
+  for(d=0;d<=md->MN;d++){
+    fread(&tmp,sizeof(int),1,fp);
+    fread(md->bd.sb[d].sid,sizeof(int),md->bd.sb[d].Ne+1,fp);
+    for(i=0;i<=md->bd.sb[d].Ne;i++) for(j=0;j<4;j++) fread(md->bd.sb[d]. U[i][j],sizeof(double complex),4,fp);
+    for(i=0;i<=md->bd.sb[d].Ne;i++) for(j=0;j<4;j++) fread(md->bd.sb[d].dU[i][j],sizeof(double complex),4,fp);
+    for(i=0;i<=md->bd.sb[d].Ne;i++) for(j=0;j<4;j++) fread(md->bd.sb[d]. E[i][j],sizeof(double complex),3,fp);
+    for(i=0;i<=md->bd.sb[d].Ne;i++) for(j=0;j<4;j++) fread(md->bd.sb[d].dE[i][j],sizeof(double complex),3,fp);
+    for(i=0;i<=md->bd.sb[d].Ne;i++) for(j=0;j<4;j++) fread(md->bd.sb[d]. H[i][j],sizeof(double complex),3,fp);
+    for(i=0;i<=md->bd.sb[d].Ne;i++) for(j=0;j<4;j++) fread(md->bd.sb[d].dH[i][j],sizeof(double complex),3,fp);
+  }
+
+  fclose(fp);
+}
+
+void dat_write_domd(char *fname,DOMD *md)
+{
+  FILE *fp;
+  int i,j,d;
+
+  if((fp=fopen(fname,"wb"))==NULL){    printf("dat_write(), Failed to create the %s file.\n",fname);    exit(1);  }
+
+  // fname
+  fwrite(md->med_fn,sizeof(char),128,fp);
+  fwrite(md->msh_fn,sizeof(char),128,fp);
+  // rotation and translation data
+  fwrite(md->rv,sizeof(double),3,fp);
+  fwrite(&(md->th),sizeof(double),1,fp);
+  fwrite(md->tv,sizeof(double),3,fp);
+  // material def
+  fwrite(&(md->MN),sizeof(int),1,fp);
+  fwrite(md->n,sizeof(double complex),md->MN+1,fp);
+  fwrite(md->kn,sizeof(double complex),md->MN+1,fp);
+  // multi_fbeam
+  fwrite(&(md->mw),sizeof(Bobj),1,fp);
+  fwrite(md->mw.bd.ipw,sizeof(Ipw),md->mw.n_ipw,fp);
+  fwrite(md->mw.bd.fpw,sizeof(Fpw),md->mw.n_fpw,fp);
+  fwrite(md->mw.bd.lgb,sizeof(LGb),md->mw.n_lgb,fp);
+  fwrite(md->mw.bd.bsb,sizeof(Bsb),md->mw.n_bsb,fp);
+  fwrite(md->mw.bd.blg,sizeof(BsLGb),md->mw.n_blg,fp);
+  fwrite(md->mw.bd.rab,sizeof(RAb),md->mw.n_rab,fp);
+  // BOUD
+  fwrite(&(md->bd.Nn),sizeof(int),1,fp);
+  fwrite(&(md->bd.Ne),sizeof(int),1,fp);
+  for(i=0;i<=md->bd.Nn;i++) fwrite(md->bd.rn[i],sizeof(double),3,fp);
+  for(i=0;i<=md->bd.Ne;i++) fwrite(md->bd.ed[i],sizeof(int),4,fp);
+  fwrite(&(md->bd.NN),sizeof(int),1,fp);
+  for(i=0;i<=md->bd.Ne;i++) fwrite(md->bd.eni[i],sizeof(int),4,fp);
+  fwrite(md->bd.md,sizeof(int),md->bd.Ne+1,fp);
+  fwrite(md->bd.sd,sizeof(int),md->bd.Ne+1,fp);
+  fwrite(md->bd.gd,sizeof(int),md->bd.Ne+1,fp);
+  for(i=0;i<=md->bd.Ne;i++) for(j=0;j<4;j++) fwrite(md->bd.ren[i][j],sizeof(double),3,fp);
+  for(i=0;i<=md->bd.Ne;i++) for(j=0;j<4;j++) fwrite(md->bd.wen[i][j],sizeof(double),3,fp);
+  for(i=0;i<=md->bd.Ne;i++) for(j=0;j<4;j++) fwrite(md->bd. Ui[i][j],sizeof(double complex),4,fp);
+  for(i=0;i<=md->bd.Ne;i++) for(j=0;j<4;j++) fwrite(md->bd.dUi[i][j],sizeof(double complex),4,fp);
+  // sub domain data
+  for(d=0;d<=md->MN;d++){
+    fwrite(&(md->bd.sb[d].Ne),sizeof(int),1,fp);
+    fwrite(md->bd.sb[d].sid,sizeof(int),md->bd.sb[d].Ne+1,fp);
+    for(i=0;i<=md->bd.sb[d].Ne;i++) for(j=0;j<4;j++) fwrite(md->bd.sb[d]. U[i][j],sizeof(double complex),4,fp);
+    for(i=0;i<=md->bd.sb[d].Ne;i++) for(j=0;j<4;j++) fwrite(md->bd.sb[d].dU[i][j],sizeof(double complex),4,fp);
+    for(i=0;i<=md->bd.sb[d].Ne;i++) for(j=0;j<4;j++) fwrite(md->bd.sb[d]. E[i][j],sizeof(double complex),3,fp);
+    for(i=0;i<=md->bd.sb[d].Ne;i++) for(j=0;j<4;j++) fwrite(md->bd.sb[d].dE[i][j],sizeof(double complex),3,fp);
+    for(i=0;i<=md->bd.sb[d].Ne;i++) for(j=0;j<4;j++) fwrite(md->bd.sb[d]. H[i][j],sizeof(double complex),3,fp);
+    for(i=0;i<=md->bd.sb[d].Ne;i++) for(j=0;j<4;j++) fwrite(md->bd.sb[d].dH[i][j],sizeof(double complex),3,fp);
+  }
+
+  fclose(fp);
+}
+
+void output_node_particles(char *fname,DOMD *md)
+{
+  FILE *fp;
+  int s1,s2,i,j;
+  char *sd,fo[128]="";
+
+  sd=strrchr(fname,'.');
+  if(sd==NULL){ // no file extension
+    sprintf(fo,"%s.particles",fname);
+  }
+  else {
+    s1=strlen(fname);
+    s2=strlen(sd);
+    strncpy(fo,fname,s1-s2);
+    sprintf(fo,"%s.particles",fo);
+  }
+  
+  if((fp=fopen(fo,"wt"))==NULL){    printf("Can not open the %s file.\n",fo);    exit(1);  }
+  fprintf(fp,"# x y z object_id\n");
+  
+  for(i=1;i<=md->bd.Ne;i++){
+    for(j=0;j<4;j++){
+      fprintf(fp,"%15.14e %15.14e %15.14e %d\n",md->bd.ren[i][j][0],md->bd.ren[i][j][1],md->bd.ren[i][j][2],0);
+    }
+  }
+
+  fclose(fp);
+}
 
 /////////////////////////////////////////////////////////////////////////////
 void rotation_translation_obj(double *rv,double th,double *tv,DOMD *md)
@@ -213,6 +407,9 @@ void print_medium_data(DOMD *md)
 
 void read_mesh_data(char *msh_fn,DOMD *md)
 {
+  void malloc_node(BOUD *bd);
+  void malloc_elem(BOUD *bd);
+  
   FILE *fp;
   char buf[256]="";
   double td;
@@ -729,8 +926,6 @@ void init_boundary_data(DOMD *md)
 
 }
 
-
-
 double fid_calc_solid_angle(int type,double r[4][3],int *flg)
 {
   double n01[3],n12[3],n20[3],nt[3],sa,ca;
@@ -804,162 +999,4 @@ double fid_calc_solid_angle(int type,double r[4][3],int *flg)
   return Omega;
 }
 
-int domain_id(double *rt,DOMD *md)
-{
-  double rv[4][3],omega;
-  double *Og=(double *)m_alloc2(md->MN+1,sizeof(double),"b_utils.c, domain_id()");
-  int i,j,k,d,flg;
-
-  for(d=0;d<md->MN+1;d++){
-    for(i=1;i<=md->bd.sb[d].Ne;i++){
-      if(md->bd.sb[d].sid[i]>0){
-        // read node data
-        for(j=0;j<4;j++)
-          for(k=0;k<3;k++) rv[j][k]=md->bd.rn[md->bd.ed[md->bd.sb[d].sid[i]][j]][k]-rt[k];
-        omega=fid_calc_solid_angle(check_element_type(md->bd.sb[d].sid[i],&(md->bd)),rv,&flg);
-        if(flg<0){ // on boundary
-          free(Og);
-          return d;
-        }
-        Og[d]+=omega;
-        Og[md->bd.sd[md->bd.sb[d].sid[i]]]-=omega;
-
-      } // end if
-    }
-    if(d==0 && fabs(Og[d])<2.0*M_PI){ // opened region
-      free(Og);
-      return d;
-    }
-    else if(Og[d]>2.0*M_PI){ // closed region
-      free(Og);
-      return d;
-    }
-  }
-
-  free(Og);
-  return -1; // error
-}
-
-void dat_read_domd(char *fname,DOMD *md)
-{
-  FILE *fp;
-  int i,j,d,tmp;
-
-  if((fp=fopen(fname,"rb"))==NULL){    printf("dat_read(), Failed to open the %s file.\n",fname);    exit(1);  }
-
-  // fname
-  fread(md->med_fn,sizeof(char),128,fp);
-  fread(md->msh_fn,sizeof(char),128,fp);
-  // rotation and translation data
-  fread(md->rv,sizeof(double),3,fp);
-  fread(&(md->th),sizeof(double),1,fp);
-  fread(md->tv,sizeof(double),3,fp);
-  // material def
-  fread(&(md->MN),sizeof(int),1,fp);
-  md->n =(double complex *)m_alloc2(md->MN+1,sizeof(double complex),"read_medium_data(), md->n"); // malloc
-  md->kn=(double complex *)m_alloc2(md->MN+1,sizeof(double complex),"read_medium_data(),md->kn"); // malloc
-  fread(md->n,sizeof(double complex),md->MN+1,fp);
-  fread(md->kn,sizeof(double complex),md->MN+1,fp);
-  // multi_wave_nt
-  fread(&(md->mw),sizeof(Bobj),1,fp);
-  md->mw.bd.ipw=(Ipw *)m_alloc2(md->mw.n_ipw,sizeof(Ipw),"setup.c,dat_read(),md->mw.bd.ipw"); // malloc
-  md->mw.bd.fpw=(Fpw *)m_alloc2(md->mw.n_fpw,sizeof(Fpw),"setup.c,dat_read(),md->mw.bd.fpw"); // malloc
-  md->mw.bd.lgb=(LGb *)m_alloc2(md->mw.n_lgb,sizeof(LGb),"setup.c,dat_read(),md->mw.bd.lgb"); // malloc
-  md->mw.bd.bsb=(Bsb *)m_alloc2(md->mw.n_bsb,sizeof(Bsb),"setup.c,dat_read(),md->mw.bd.bsb"); // malloc
-  md->mw.bd.blg=(BsLGb *)m_alloc2(md->mw.n_blg,sizeof(BsLGb),"setup.c,dat_read(),md->mw.bd.blg"); // malloc
-  md->mw.bd.rab=(RAb *)m_alloc2(md->mw.n_rab,sizeof(RAb),"setup.c,dat_read(),md->mw.bd.rab"); // malloc
-  fread(md->mw.bd.ipw,sizeof(Ipw),md->mw.n_ipw,fp);
-  fread(md->mw.bd.fpw,sizeof(Fpw),md->mw.n_fpw,fp);
-  fread(md->mw.bd.lgb,sizeof(LGb),md->mw.n_lgb,fp);
-  fread(md->mw.bd.bsb,sizeof(Bsb),md->mw.n_bsb,fp);
-  fread(md->mw.bd.blg,sizeof(BsLGb),md->mw.n_blg,fp);
-  fread(md->mw.bd.rab,sizeof(RAb),md->mw.n_rab,fp);
-  setup_mfb(&(md->mw)); // setup multi_wave
-  // BOUD
-  fread(&(md->bd.Nn),sizeof(int),1,fp);
-  fread(&(md->bd.Ne),sizeof(int),1,fp);
-  malloc_node(&(md->bd)); // malloc
-  malloc_elem(&(md->bd)); // malloc
-  for(i=0;i<=md->bd.Nn;i++) fread(md->bd.rn[i],sizeof(double),3,fp);
-  for(i=0;i<=md->bd.Ne;i++) fread(md->bd.ed[i],sizeof(int),4,fp);
-  fread(&(md->bd.NN),sizeof(int),1,fp);
-  for(i=0;i<=md->bd.Ne;i++) fread(md->bd.eni[i],sizeof(int),4,fp);
-  fread(md->bd.md,sizeof(int),md->bd.Ne+1,fp);
-  fread(md->bd.sd,sizeof(int),md->bd.Ne+1,fp);
-  fread(md->bd.gd,sizeof(int),md->bd.Ne+1,fp);
-  for(i=0;i<=md->bd.Ne;i++) for(j=0;j<4;j++) fread(md->bd.ren[i][j],sizeof(double),3,fp);
-  for(i=0;i<=md->bd.Ne;i++) for(j=0;j<4;j++) fread(md->bd.wen[i][j],sizeof(double),3,fp);
-  for(i=0;i<=md->bd.Ne;i++) for(j=0;j<4;j++) fread(md->bd. Ui[i][j],sizeof(double complex),4,fp);
-  for(i=0;i<=md->bd.Ne;i++) for(j=0;j<4;j++) fread(md->bd.dUi[i][j],sizeof(double complex),4,fp);
-  init_elem_const(&(md->bd)); // setup
-  // sub domain data
-  malloc_sub_domain(md); // malloc
-  for(d=0;d<=md->MN;d++){
-    fread(&tmp,sizeof(int),1,fp);
-    fread(md->bd.sb[d].sid,sizeof(int),md->bd.sb[d].Ne+1,fp);
-    for(i=0;i<=md->bd.sb[d].Ne;i++) for(j=0;j<4;j++) fread(md->bd.sb[d]. U[i][j],sizeof(double complex),4,fp);
-    for(i=0;i<=md->bd.sb[d].Ne;i++) for(j=0;j<4;j++) fread(md->bd.sb[d].dU[i][j],sizeof(double complex),4,fp);
-    for(i=0;i<=md->bd.sb[d].Ne;i++) for(j=0;j<4;j++) fread(md->bd.sb[d]. E[i][j],sizeof(double complex),3,fp);
-    for(i=0;i<=md->bd.sb[d].Ne;i++) for(j=0;j<4;j++) fread(md->bd.sb[d].dE[i][j],sizeof(double complex),3,fp);
-    for(i=0;i<=md->bd.sb[d].Ne;i++) for(j=0;j<4;j++) fread(md->bd.sb[d]. H[i][j],sizeof(double complex),3,fp);
-    for(i=0;i<=md->bd.sb[d].Ne;i++) for(j=0;j<4;j++) fread(md->bd.sb[d].dH[i][j],sizeof(double complex),3,fp);
-  }
-
-  fclose(fp);
-}
-
-void dat_write_domd(char *fname,DOMD *md)
-{
-  FILE *fp;
-  int i,j,d;
-
-  if((fp=fopen(fname,"wb"))==NULL){    printf("dat_write(), Failed to create the %s file.\n",fname);    exit(1);  }
-
-  // fname
-  fwrite(md->med_fn,sizeof(char),128,fp);
-  fwrite(md->msh_fn,sizeof(char),128,fp);
-  // rotation and translation data
-  fwrite(md->rv,sizeof(double),3,fp);
-  fwrite(&(md->th),sizeof(double),1,fp);
-  fwrite(md->tv,sizeof(double),3,fp);
-  // material def
-  fwrite(&(md->MN),sizeof(int),1,fp);
-  fwrite(md->n,sizeof(double complex),md->MN+1,fp);
-  fwrite(md->kn,sizeof(double complex),md->MN+1,fp);
-  // multi_fbeam
-  fwrite(&(md->mw),sizeof(Bobj),1,fp);
-  fwrite(md->mw.bd.ipw,sizeof(Ipw),md->mw.n_ipw,fp);
-  fwrite(md->mw.bd.fpw,sizeof(Fpw),md->mw.n_fpw,fp);
-  fwrite(md->mw.bd.lgb,sizeof(LGb),md->mw.n_lgb,fp);
-  fwrite(md->mw.bd.bsb,sizeof(Bsb),md->mw.n_bsb,fp);
-  fwrite(md->mw.bd.blg,sizeof(BsLGb),md->mw.n_blg,fp);
-  fwrite(md->mw.bd.rab,sizeof(RAb),md->mw.n_rab,fp);
-  // BOUD
-  fwrite(&(md->bd.Nn),sizeof(int),1,fp);
-  fwrite(&(md->bd.Ne),sizeof(int),1,fp);
-  for(i=0;i<=md->bd.Nn;i++) fwrite(md->bd.rn[i],sizeof(double),3,fp);
-  for(i=0;i<=md->bd.Ne;i++) fwrite(md->bd.ed[i],sizeof(int),4,fp);
-  fwrite(&(md->bd.NN),sizeof(int),1,fp);
-  for(i=0;i<=md->bd.Ne;i++) fwrite(md->bd.eni[i],sizeof(int),4,fp);
-  fwrite(md->bd.md,sizeof(int),md->bd.Ne+1,fp);
-  fwrite(md->bd.sd,sizeof(int),md->bd.Ne+1,fp);
-  fwrite(md->bd.gd,sizeof(int),md->bd.Ne+1,fp);
-  for(i=0;i<=md->bd.Ne;i++) for(j=0;j<4;j++) fwrite(md->bd.ren[i][j],sizeof(double),3,fp);
-  for(i=0;i<=md->bd.Ne;i++) for(j=0;j<4;j++) fwrite(md->bd.wen[i][j],sizeof(double),3,fp);
-  for(i=0;i<=md->bd.Ne;i++) for(j=0;j<4;j++) fwrite(md->bd. Ui[i][j],sizeof(double complex),4,fp);
-  for(i=0;i<=md->bd.Ne;i++) for(j=0;j<4;j++) fwrite(md->bd.dUi[i][j],sizeof(double complex),4,fp);
-  // sub domain data
-  for(d=0;d<=md->MN;d++){
-    fwrite(&(md->bd.sb[d].Ne),sizeof(int),1,fp);
-    fwrite(md->bd.sb[d].sid,sizeof(int),md->bd.sb[d].Ne+1,fp);
-    for(i=0;i<=md->bd.sb[d].Ne;i++) for(j=0;j<4;j++) fwrite(md->bd.sb[d]. U[i][j],sizeof(double complex),4,fp);
-    for(i=0;i<=md->bd.sb[d].Ne;i++) for(j=0;j<4;j++) fwrite(md->bd.sb[d].dU[i][j],sizeof(double complex),4,fp);
-    for(i=0;i<=md->bd.sb[d].Ne;i++) for(j=0;j<4;j++) fwrite(md->bd.sb[d]. E[i][j],sizeof(double complex),3,fp);
-    for(i=0;i<=md->bd.sb[d].Ne;i++) for(j=0;j<4;j++) fwrite(md->bd.sb[d].dE[i][j],sizeof(double complex),3,fp);
-    for(i=0;i<=md->bd.sb[d].Ne;i++) for(j=0;j<4;j++) fwrite(md->bd.sb[d]. H[i][j],sizeof(double complex),3,fp);
-    for(i=0;i<=md->bd.sb[d].Ne;i++) for(j=0;j<4;j++) fwrite(md->bd.sb[d].dH[i][j],sizeof(double complex),3,fp);
-  }
-
-  fclose(fp);
-}
 

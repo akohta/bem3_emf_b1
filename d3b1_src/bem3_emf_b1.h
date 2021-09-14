@@ -11,14 +11,15 @@
 #include "d3b1_elem.h"
 
 // ------- setup.c ----------------------------------------------------
-void read_domd(int argc,char **argv,DOMD *md); // read data file. this is for the solver
-void print_domd(DOMD *md);                     // print readed data
-void print_domd_mksa(DOMD *md);                // print readed data in MKSA system of units
-void initialize_domd(DOMD *md);                // initialize the data. this is for the solver
-void finalize_domd(DOMD *md);                  // free allocated memory.
-int domain_id(double *rt,DOMD *md);            // return domain id of point rt, return the main domain id if rt is on boundary
-void dat_read_domd(char *filename,DOMD *md);   // read datafile outputed by dat_write_domd()
-void dat_write_domd(char *filename,DOMD *md);  // write all data in binary file with specified filename
+void read_domd(int argc,char **argv,DOMD *md);    // read data file. this is for the solver
+void print_domd(DOMD *md);                        // print readed data
+void print_domd_mksa(DOMD *md);                   // print readed data in MKSA system of units
+void initialize_domd(DOMD *md);                   // initialize the data. this is for the solver
+void finalize_domd(DOMD *md);                     // free allocated memory.
+int domain_id(double *rt,DOMD *md);               // return domain id of point rt, return the main domain id if rt is on boundary
+void dat_read_domd(char *filename,DOMD *md);      // read datafile outputed by dat_write_domd()
+void dat_write_domd(char *filename,DOMD *md);     // write all data in binary file with specified filename
+void output_node_particles(char *fname,DOMD *md); // outputs the nodes as point cloud data ( .particles file ) 
 
 
 // ------- solve_bieq.c -----------------------------------------------
