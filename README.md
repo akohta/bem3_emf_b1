@@ -30,11 +30,11 @@ The electromagnetic field analysis program "multi_fbeam" is used for analyze inc
    As a simple representation of the analysis model, the nodes used for the surface integral are output as point cloud data. 
    In this example, the file "ex.particles" is output, and the visualization result is "ex_particle.png" (using ParaView).
 
-3. type './example1.out' with a argument of datafile name outputed by d3b1_bv_solver.  
+3. type './example1.out' with an argument of datafile name outputed by d3b1_bv_solver.  
    For example, './example1.out ex.dat'. 
    This executable calculates electromagnetic field, radiation force and torque.  
 
-4. type './example2.out' with a argument of datafile name outputed by d3b1_bv_solver.   
+4. type './example2.out' with an argument of datafile name outputed by d3b1_bv_solver.   
    For example, './example2.out ex.dat'. 
    This executable calculates electromagnetic field intensity distributions, outputs them to text files. 
    The I_example2.png is the visualization result of intensity distributions, created by Gnuplot script gscript_example2.plt.  
@@ -87,7 +87,7 @@ The result of "emf_mie_ms" is in the folder emf_mie_ms_result.
 
 This code can use quadrangular ( bi-linear ) and triangular ( linear triangular ) elements. 
 I recommend using quadrangular element for reduce required memory. 
-The samples of mesh data is in the folder mesh_sample. 
+The samples of mesh data are in the folder mesh_sample. 
 The file with extension .geo is the Gmsh geometry file. 
 The file with extension .msh is the mesh datafile created by Gmsh geometry file. 
 These mesh files are created by the command 'gmsh -2 -tol 1.0e-15 xxxx.geo' in command line ( xxxx.geo is a geometry file). 
