@@ -95,11 +95,29 @@ The domain number ( Physical Surface ) 99 is assigned to the open domain in Gmsh
 Please refer to the manual of Gmsh for detail of geometry file.  
 
 
+## System of units  
+
+This program use the own defined system of units (OSU), optimized for optics. 
+The system of units is defined as <img src="https://latex.codecogs.com/gif.latex?c_0=1"> ( speed of light in vacuum ), 
+<img src="https://latex.codecogs.com/gif.latex?\mu_0=1"> ( permeability of vacuum ). 
+For the conversion from OSU to MKSA system of units, the unit of length in OSU is defined as 
+<img src="https://latex.codecogs.com/gif.latex?1\times10^{-6}"> [m] in MKSA, the unit of power in OSU is defined as
+<img src="https://latex.codecogs.com/gif.latex?1\times10^{-3}"> [W] in MKSA. The conversions of base unit are follows.  
+<img src="https://latex.codecogs.com/gif.latex?a=1\times10^{-6}">,  
+<img src="https://latex.codecogs.com/gif.latex?b=1\times10^{-3}">,  
+<img src="https://latex.codecogs.com/gif.latex?a\,\mathrm{[m]}=1\,\mathrm{[L]}">,  
+<img src="https://latex.codecogs.com/gif.latex?\frac{ab}{c_0^3}\,\mathrm{[kg]}=1\,\mathrm{[M]}">,  
+<img src="https://latex.codecogs.com/gif.latex?\frac{a}{c_0}\,\mathrm{[s]}=1\,\mathrm{[T]}">,  
+<img src="https://latex.codecogs.com/gif.latex?\sqrt{\frac{b}{c_0\mu_0}}\,\mathrm{[A]}=1\,\mathrm{[I]}">.  
+Please see com_src/osu_mksa.h and com_src/osu_mksa.c for detail of conversions.  
+
+
 ## References  
 
 1. Intel Math Kernel Library [MKL](https://software.intel.com/mkl)  
 2. Three-dimensional mesh generator [Gmsh](https://gmsh.info/)  
-3. The electromagnetic field analysis program [multi_fbeam](https://github.com/akohta/multi_fbeam/)   
-4. The electromagnetic field analysis program [emf_mie_mmls](https://github.com/akohta/emf_mie_mmls/)  
-5. The electromagnetic field analysis program [emf_mie_ms](https://github.com/akohta/emf_mie_ms/)  
-6. The data analysis and visualization application [ParaView](https://www.paraview.org/)  
+3. Command-line driven graphing utility [gnuplot](http://www.gnuplot.info/)  
+4. The electromagnetic field analysis program [multi_fbeam](https://github.com/akohta/multi_fbeam/)   
+5. The electromagnetic field analysis program [emf_mie_mmls](https://github.com/akohta/emf_mie_mmls/)  
+6. The electromagnetic field analysis program [emf_mie_ms](https://github.com/akohta/emf_mie_ms/)  
+7. The data analysis and visualization application [ParaView](https://www.paraview.org/)  
