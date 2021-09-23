@@ -32,16 +32,16 @@ The electromagnetic field analysis program "multi_fbeam" is used for analyze inc
    As a simple representation of the analysis model, the nodes used for the surface integral are output as point cloud data. 
    In this example, the file ex.particles is output, and the visualization result is ex_particle.png (using ParaView).  
 
-3. type './example1.out' with an argument of datafile name outputed by d3b1_bv_solver.  
+3. type './example1.out' with an argument of datafile name output by d3b1_bv_solver.  
    For example, './example1.out ex.dat'. 
    This executable calculates electromagnetic field, radiation force and torque.  
 
-4. type './example2.out' with an argument of datafile name outputed by d3b1_bv_solver.   
+4. type './example2.out' with an argument of datafile name output by d3b1_bv_solver.   
    For example, './example2.out ex.dat'. 
    This executable calculates electromagnetic field intensity distributions, outputs them to text files. 
    The I_example2.png is the visualization result of intensity distributions, created by Gnuplot script gscript_example2.plt.  
    
-5. type './example3.out' with an argument of datafile name outputed by d3b1_bv_solver.  
+5. type './example3.out' with an argument of datafile name output by d3b1_bv_solver.  
    For example, './example3.out ex.dat'. 
    This executable calculates instantaneous value of the electromagnetic fields, outputs them to png image files. 
    The image files are output to the folder which has a name adding "images" to the datafile name specified in the argument (file-extension is excluded). 
