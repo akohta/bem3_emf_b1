@@ -237,16 +237,31 @@ void create_cmatrix_domain(int did,CMD *cm,DOMD *md)
     }
   }
 
-  fwrite(tG,sizeof(double complex),N*N,fg);
-  fwrite(tH,sizeof(double complex),N*N,fh);
+  if(fwrite(tG,sizeof(double complex),N*N,fg)!=N*N){
+    printf("solve_bieq.c, create_cmatrix_domain(), failed to write the tG. exit...\n");
+    exit(1);
+  }
+  if(fwrite(tH,sizeof(double complex),N*N,fh)!=N*N){
+    printf("solve_bieq.c, create_cmatrix_domain(), failed to write the tH. exit...\n");
+    exit(1);
+  }
   fclose(fg);
   fclose(fh);
   free(tG);
   free(tH);
 
-  fwrite(tdG,sizeof(double complex),2*N*N,fdg);
-  fwrite(tdH,sizeof(double complex),2*N*N,fdh);
-  fwrite(tdF,sizeof(double),3*N,fdf);
+  if(fwrite(tdG,sizeof(double complex),2*N*N,fdg)!=2*N*N){
+    printf("solve_bieq.c, create_cmatrix_domain(), failed to write the tdG. exit...\n");
+    exit(1);
+  }
+  if(fwrite(tdH,sizeof(double complex),2*N*N,fdh)!=2*N*N){
+    printf("solve_bieq.c, create_cmatrix_domain(), failed to write the tdH. exit...\n");
+    exit(1);
+  }
+  if(fwrite(tdF,sizeof(double),3*N,fdf)!=3*N){
+    printf("solve_bieq.c, create_cmatrix_domain(), failed to write the tdF. exit...\n");
+    exit(1);
+  }
   fclose(fdg);
   fclose(fdh);
   fclose(fdf);
@@ -271,7 +286,10 @@ void create_tmatrix_csr(CMD *cm,DOMD *md)
   for(did=0;did<=cm->MN;did++)
     for(cid=0;cid<4;cid++) create_matrix_csr_dac(did, cid,av,ap,ai,b,cm,md);
 
-  fwrite(&(cm->nnz),sizeof(size_t),1,ap);
+  if(fwrite(&(cm->nnz),sizeof(size_t),1,ap)!=1){
+    printf("solve_bieq.c, create_tmatrix_csr(), failed to write the nnz. exit...\n");
+    exit(1);
+  }
 
   fclose(av);
   fclose(ai);
@@ -303,11 +321,20 @@ void create_matrix_csr_dac(int did,int cid,FILE *av,FILE *ap,FILE *ai,FILE *b,CM
     td=md->bd.sb[did].sid[t];
 
     for(tn=0;tn<4;tn++){
-      fread(tG,sizeof(double complex),Ne*4,fg);
-      fread(tH,sizeof(double complex),Ne*4,fh);
+      if(fread(tG,sizeof(double complex),Ne*4,fg)!=Ne*4){
+        printf("solve_bieq.c, create_matrix_csr_dac(), failed to read the tG. exit...\n");
+        exit(1);
+      }
+      if(fread(tH,sizeof(double complex),Ne*4,fh)!=Ne*4){
+        printf("solve_bieq.c, create_matrix_csr_dac(), failed to read the tH. exit...\n");
+        exit(1);
+      }
       if( tn==3 && ELT3==check_element_type(td,&(md->bd)) )  continue;
 
-      fwrite(&(cm->nnz),sizeof(size_t),1,ap); // write A pointer
+      if(fwrite(&(cm->nnz),sizeof(size_t),1,ap)!=1){ // write A pointer
+        printf("solve_bieq.c, create_matrix_csr_dac(), failed to write the nnz. exit...\n");
+        exit(1);
+      }
       for(l=0;l<cm->na;l++) tA[l]=0.0;
       tB=0.0;
 
@@ -394,11 +421,20 @@ void create_matrix_csr_dac(int did,int cid,FILE *av,FILE *ap,FILE *ai,FILE *b,CM
         ti[cc]=l;
         cc+=1;
       }
-      fwrite(tA,sizeof(double complex),cc,av);
-      fwrite(ti,sizeof(size_t),cc,ai);
+      if(fwrite(tA,sizeof(double complex),cc,av)!=cc){
+        printf("solve_bieq.c, create_matrix_csr_dac(), failed to write the tA. exit...\n");
+        exit(1);
+      }
+      if(fwrite(ti,sizeof(size_t),cc,ai)!=cc){
+        printf("solve_bieq.c, create_matrix_csr_dac(), failed to write the ti. exit...\n");
+        exit(1);
+      }
       cm->nnz+=cc;
 
-      fwrite(&tB,sizeof(double complex),1,b);
+      if(fwrite(&tB,sizeof(double complex),1,b)!=1){
+        printf("solve_bieq.c, create_matrix_csr_dac(), failed to write the tB. exit...\n");
+        exit(1);
+      }
 
     } // end for tn
 
@@ -548,9 +584,18 @@ void solve_eh_bv(CMD *cm,DOMD *md)
       atd=abs(at);
 
       for(tn=0;tn<4;tn++){
-        fread(tdG,sizeof(double complex),2*Ne*4,fdg);
-        fread(tdH,sizeof(double complex),2*Ne*4,fdh);
-        fread(tdF,sizeof(double),3,fdf);
+        if(fread(tdG,sizeof(double complex),2*Ne*4,fdg)!=2*Ne*4){
+          printf("solve_bieq.c, solve_eh_bv(), failed to read the tdG. exit...\n");
+          exit(1);
+        }
+        if(fread(tdH,sizeof(double complex),2*Ne*4,fdh)!=2*Ne*4){
+          printf("solve_bieq.c, solve_eh_bv(), failed to read the tdH. exit...\n");
+          exit(1);
+        }
+        if(fread(tdF,sizeof(double),3,fdf)!=3){
+          printf("solve_bieq.c, solve_eh_bv(), failed to read the tdF. exit...\n");
+          exit(1);
+        }
         if( tn==3 && ELT3==check_element_type(atd,&(md->bd)) )  continue;
 
         // tangential vector
@@ -665,8 +710,14 @@ void solve_deh_bv(CMD *cm,DOMD *md)
       atd=abs(md->bd.sb[d].sid[t]);
 
       for(tn=0;tn<4;tn++){
-        fread(tG,sizeof(double complex),Ne*4,fg);
-        fread(tH,sizeof(double complex),Ne*4,fh);
+        if(fread(tG,sizeof(double complex),Ne*4,fg)!=Ne*4){
+          printf("solve_bieq.c, solve_deh_bv(), failed to read the tG. exit...\n");
+          exit(1);
+        }
+        if(fread(tH,sizeof(double complex),Ne*4,fh)!=Ne*4){
+          printf("solve_bieq.c, solve_deh_bv(), failed to read the tH. exit...\n");
+          exit(1);
+        }
         if( tn==3 && ELT3==check_element_type(atd,&(md->bd)) )  continue;
 
         for(i=0;i<6;i++){
