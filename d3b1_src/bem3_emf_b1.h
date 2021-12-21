@@ -85,5 +85,16 @@ void force_FN(double *F,double *N,double *rc,int type,DOMD *md);
 // rc[0]=rc_x, rc[1]=rc_y, rc[2]=rc_z ( center of rotation ), type, pointer of DOMD object.
 // type=0:4-point GL, type!=0:9-point or 7-point GL.
 
+// ------- d3b1_absorb.c -----------------------------------------------
+// calculation of net absorbed energy
+int absorb_P(double *P,int type,DOMD *md);
+// outputs
+// P : absorbed energy 
+// inputs
+// type=0:4-point GL, type!=0:9-point or 7-point GL.
+// return 
+//  0 : normal termination
+// -1 : loss of significance (catastrophic cancellation) occurred during the surface integral of Poynting vector.
+//      The absorbed energy is even smaller than the returned value.
 
 #endif /* BEM3_EMF_B1_H_ */

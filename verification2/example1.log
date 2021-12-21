@@ -45,3 +45,13 @@ N = (-3.54695046662738e-21,-1.27054942088145e-21, 1.68364341879043e-20), center 
 type=1 setting ( 9 or 7 point Gauss-Legendre ) 
 F = ( 4.55280209149186e-21, 6.33157128072590e-20, 8.32110980008309e-07)
 N = (-3.41129284616869e-21,-3.32526606246317e-21, 1.72053567411030e-20), center of rotation ( 0, 0, 0)
+
+Absorbed energy
+type=0 setting ( 4 point Gauss-Legendre ) 
+P = 1.37711225806498e-09
+loss of significance (catastrophic cancellation) occurred.
+The absorbed energy is even smaller than the returned value.
+type=1 setting ( 9 or 7 point Gauss-Legendre ) 
+P = 1.55656603704764e-09
+loss of significance (catastrophic cancellation) occurred.
+The absorbed energy is even smaller than the returned value.

@@ -47,3 +47,9 @@ N = ( 2.40927933934645e-19,-2.74306326012385e-19,-1.88041314290455e-19), center 
 type=1 setting ( 9 or 7 point Gauss-Legendre ) 
 F = ( 1.90751819721668e-18,-1.95834017405194e-18, 9.94790701600982e-04)
 N = ( 2.39908847419980e-19,-2.63797823510511e-19,-1.12628912205220e-19), center of rotation ( 0, 0, 0)
+
+Absorbed energy
+type=0 setting ( 4 point Gauss-Legendre ) 
+P = 1.39921133636781e-05
+type=1 setting ( 9 or 7 point Gauss-Legendre ) 
+P = 1.34973893449876e-05
