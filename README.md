@@ -30,7 +30,8 @@ The electromagnetic field analysis program "multi_fbeam" is used for analyze inc
    the arguments are './d3b1_bv_solver medium_data.txt sphere_m1.msh ex.dat rx ry rz theta tx ty tz'. 
    Rodrigues' rotation formula is used. 
    As a simple representation of the analysis model, the nodes used for the surface integral are output as point cloud data. 
-   In this example, the file ex.particles is output, and the visualization result is ex_particle.png (using ParaView).  
+   In this example, the file ex.particles is output, and the visualization result is ex_particle.png.
+   The image was created using gnuplot script "gscript_particles.plt" and converted eps to png by using ImageMagick.
 
 3. type './example1.out' with an argument of datafile name output by d3b1_bv_solver.  
    For example, './example1.out ex.dat'. 
@@ -39,7 +40,7 @@ The electromagnetic field analysis program "multi_fbeam" is used for analyze inc
 4. type './example2.out' with an argument of datafile name output by d3b1_bv_solver.   
    For example, './example2.out ex.dat'. 
    This executable calculates electromagnetic field intensity distributions, outputs them to text files. 
-   The I_example2.png is the visualization result of intensity distributions, created by Gnuplot script gscript_example2.plt.  
+   The I_example2.png is the visualization result of intensity distributions, created by using gnuplot script gscript_example2.plt.  
    
 5. type './example3.out' with an argument of datafile name output by d3b1_bv_solver.  
    For example, './example3.out ex.dat'. 
@@ -103,7 +104,8 @@ I recommend using quadrangular element for reduce required memory.
 The samples of mesh data are in the folder mesh_sample. 
 The file with extension .geo is the Gmsh geometry file. 
 The file with extension .msh is the mesh datafile created by Gmsh geometry file. 
-These mesh files are created by the command 'gmsh -2 -tol 1.0e-15 xxxx.geo' in command line ( xxxx.geo is a geometry file). 
+These mesh files are created by the command 'gmsh -2 -tol 1.0e-15 -format msh2 xxxx.geo' in command line ( xxxx.geo is a geometry file). 
+The msh file format must be version 2. 
 The domain number ( Physical Surface ) 99 is assigned to the open region in Gmsh geometry file, because Gmsh can't use the number 0 (assigned to open region in the code). 
 Please refer to the manual of Gmsh for detail of geometry file.  
 
@@ -135,4 +137,3 @@ Please see com_src/osu_mksa.h and com_src/osu_mksa.c for detail of conversions.
 6. The electromagnetic field analysis program [multi_fbeam](https://github.com/akohta/multi_fbeam/)   
 7. The electromagnetic field analysis program [emf_mie_mmls](https://github.com/akohta/emf_mie_mmls/)  
 8. The electromagnetic field analysis program [emf_mie_ms](https://github.com/akohta/emf_mie_ms/)  
-9. The data analysis and visualization application [ParaView](https://www.paraview.org/)  
