@@ -41,6 +41,42 @@ int absorb_P(double *P,int type,DOMD *md)
   else return 0;
 }
 
+int absorb_P2(double *P,int did,int type,DOMD *md)
+{
+  void bil_absorb_4p(double *P,int s,DOMD *md);
+  void bil_absorb_9p(double *P,int s,DOMD *md);
+  void lit_absorb_4p(double *P,int s,DOMD *md);
+  void lit_absorb_7p(double *P,int s,DOMD *md);
+  
+  double tp,p;
+  int t,td;
+
+  p=0.0;
+  
+  #pragma omp parallel for schedule(dynamic) reduction(+:p) private(td,tp)
+  for(t=1;t<=md->bd.sb[0].Ne;t++){
+    td=md->bd.sb[0].sid[t];
+    if(md->bd.sd[abs(td)]!=did && did!=0) continue;
+    if( ELT4==check_element_type(td,&(md->bd)) ){
+      if(type==0) bil_absorb_4p(&tp,t,md);
+      else bil_absorb_9p(&tp,t,md);
+    }
+    else {
+      if(type==0) lit_absorb_4p(&tp,t,md);
+      else lit_absorb_7p(&tp,t,md);
+    }
+    p+=tp;
+  }
+  *P=-p;
+  
+  if(*P<0.0){
+    *P*=-1.0;
+    return -1;
+  }
+  else return 0; 
+}
+
+
 ////////////////////////////////////////////////////////////////////////
 void bil_absorb_4p(double *P,int s,DOMD *md)
 {

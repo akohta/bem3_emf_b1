@@ -1,5 +1,7 @@
 ## medium data file for bem3_emf_b1
 # number of medium
-1
+3
 # real(refractive_index) imag(refractive_index)  
+1.60 1.0e-6
+1.60 1.0e-6
 1.60 1.0e-6

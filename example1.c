@@ -36,6 +36,7 @@ int main(int argc,char *argv[])
   printf("Hy = % 15.14e %+15.14e I \n",creal(H[1]),cimag(H[1])); 
   printf("Hz = % 15.14e %+15.14e I \n",creal(H[2]),cimag(H[2]));  
   
+
   rc[0]=0.0;                  // set x coordinate of rotation center 
   rc[1]=0.0;                  // set y coordinate of rotation center 
   rc[2]=0.0;                  // set z coordinate of rotation center 
@@ -51,6 +52,7 @@ int main(int argc,char *argv[])
   printf("F = (% 15.14e,% 15.14e,% 15.14e)\n",F[0],F[1],F[2]);
   printf("N = (% 15.14e,% 15.14e,% 15.14e), center of rotation (% g,% g,% g)\n",N[0],N[1],N[2],rc[0],rc[1],rc[2]); 
 
+
   printf("\nAbsorbed energy\n");
   printf("type=0 setting ( 4 point Gauss-Legendre ) \n"); 
   type=0;                     // select 4 point Gauss-Legendre
@@ -62,6 +64,7 @@ int main(int argc,char *argv[])
   absorb_P(&P,type,&md);
   printf("P =% 15.14e\n",P);
   if(ret<0) printf("loss of significance (catastrophic cancellation) occurred.\nThe absorbed energy is even smaller than the returned value.\n");
+
 
   finalize_domd(&md);
   return 0;

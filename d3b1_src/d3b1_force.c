@@ -48,6 +48,42 @@ void force_FN(double *F,double *N,double *rc,int type,DOMD *md)
   N[2]=Nz;
 }
 
+void force_FN2(double *F,double *N,double *rc,int did,int type,DOMD *md)
+{
+  double tf[3],tn[3],Fx,Fy,Fz,Nx,Ny,Nz;
+  int t,td;
+
+  Fx=0.0;    Fy=0.0;    Fz=0.0;
+  Nx=0.0;    Ny=0.0;    Nz=0.0;
+
+  #pragma omp parallel for schedule(dynamic) reduction(+:Fx,Fy,Fz,Nx,Ny,Nz) private(td,tf,tn)
+  for(t=1;t<=md->bd.sb[0].Ne;t++){
+    td=md->bd.sb[0].sid[t];
+    if(md->bd.sd[abs(td)]!=did && did!=0) continue;
+    if( ELT4==check_element_type(td,&(md->bd)) ){
+      if(type==0) bil_force_4p(tf,tn,rc,t,md);
+      else bil_force_9p(tf,tn,rc,t,md);
+    }
+    else {
+      if(type==0) lit_force_4p(tf,tn,rc,t,md);
+      else lit_force_7p(tf,tn,rc,t,md);
+    }
+    Fx+=tf[0];
+    Fy+=tf[1];
+    Fz+=tf[2];
+    Nx+=tn[0];
+    Ny+=tn[1];
+    Nz+=tn[2];
+  }
+
+  F[0]=Fx;
+  F[1]=Fy;
+  F[2]=Fz;
+  N[0]=Nx;
+  N[1]=Ny;
+  N[2]=Nz; 
+}
+
 /////////////////////////////////////////////////////////////////////////////
 void bil_force_4p(double *F,double *N,double *rc,int s,DOMD *md)
 {

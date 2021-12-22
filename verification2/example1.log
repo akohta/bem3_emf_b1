@@ -1,6 +1,6 @@
-../example1.out v2.dat
+../example1.out v2.dat 
 
--- multi-wave data --
+-- multi_fbeam data --
  "ipw.txt" No.00 -- plane wave --
 wave length of incident beam in vacuum      :           1.064
 refractive index of surrounding             :            1.33
@@ -16,42 +16,45 @@ rotation parameter phi                 [rad]:               0
 -- medium data --
 medium data file name                  : medium_data.txt
 medium (domain) id  1 refractive index :     1.6 +    1e-06I
+medium (domain) id  2 refractive index :     1.6 +    1e-06I
+medium (domain) id  3 refractive index :     1.6 +    1e-06I
 
 -- mesh data --
 mesh data file name    : sphere_m3.msh
 node number            :     1158
 defined element number :     2304
 
+
 Total electromagnetic field at r=(  0.3, 0, 1.1 )
 type=0 setting ( 4 point Gauss-Legendre )
-Ex = -2.81935789463205e-02 +2.76715009475776e-02 I 
-Ey =  2.44739582180405e-19 -6.17578008373160e-19 I 
-Ez =  2.34215576862216e-04 -4.96304679299411e-06 I 
-Hx = -1.44099825780472e-19 -3.26769429160405e-20 I 
-Hy = -3.75453050188578e-02 +3.67812072659256e-02 I 
-Hz = -2.41469240910841e-18 -4.46826423258069e-19 I 
+Ex = -2.81936287055620e-02 +2.76715568157840e-02 I 
+Ey =  6.81494916045213e-18 +1.59685723188723e-15 I 
+Ez =  2.34217453674411e-04 -4.96257829419799e-06 I 
+Hx =  1.91899281138646e-16 +2.06131224877177e-17 I 
+Hy = -3.75453772433748e-02 +3.67812710624669e-02 I 
+Hz = -2.44625645495659e-16 +3.55980816182332e-18 I 
 type=1 setting ( 9 or 7 point Gauss-Legendre )
-Ex = -2.81935781598945e-02 +2.76715004439968e-02 I 
-Ey =  3.66844675499917e-19 -4.34767784319096e-19 I 
-Ez =  2.34214061500079e-04 -4.96296461438047e-06 I 
-Hx = -1.52136712621978e-19 -2.72903427693495e-20 I 
-Hy = -3.75453057905068e-02 +3.67812074212753e-02 I 
-Hz = -2.34566749587990e-18 -1.13942805890199e-18 I 
+Ex = -2.81936279191021e-02 +2.76715563122077e-02 I 
+Ey =  6.04520797010494e-18 +1.59675880412195e-15 I 
+Ez =  2.34215938284301e-04 -4.96249609624969e-06 I 
+Hx =  1.93396126508845e-16 +2.18485068078203e-17 I 
+Hy = -3.75453780149506e-02 +3.67812712178349e-02 I 
+Hz = -2.44128651412276e-16 +2.44811381474459e-18 I 
 
 Radiation force and torque
 type=0 setting ( 4 point Gauss-Legendre ) 
-F = ( 2.18375681713999e-21, 5.57321209513728e-20, 8.32444182839099e-07)
-N = (-3.54695046662738e-21,-1.27054942088145e-21, 1.68364341879043e-20), center of rotation ( 0, 0, 0)
+F = ( 2.22997305232456e-18, 4.77470884180473e-17, 8.31063527266774e-07)
+N = (-2.00421064774046e-18, 9.82067204403377e-18,-1.37818150044236e-17), center of rotation ( 0, 0, 0)
 type=1 setting ( 9 or 7 point Gauss-Legendre ) 
-F = ( 4.55280209149186e-21, 6.33157128072590e-20, 8.32110980008309e-07)
-N = (-3.41129284616869e-21,-3.32526606246317e-21, 1.72053567411030e-20), center of rotation ( 0, 0, 0)
+F = ( 1.07544596939326e-17, 5.02425930644463e-17, 8.30730512381358e-07)
+N = (-2.05244024053597e-18, 1.07993789099167e-17,-1.40794759478508e-17), center of rotation ( 0, 0, 0)
 
 Absorbed energy
 type=0 setting ( 4 point Gauss-Legendre ) 
-P = 1.37711225806498e-09
+P = 2.28534730202766e-09
 loss of significance (catastrophic cancellation) occurred.
 The absorbed energy is even smaller than the returned value.
 type=1 setting ( 9 or 7 point Gauss-Legendre ) 
-P = 1.55656603704764e-09
+P = 2.46475115306871e-09
 loss of significance (catastrophic cancellation) occurred.
 The absorbed energy is even smaller than the returned value.
