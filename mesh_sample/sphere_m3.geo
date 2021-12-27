@@ -66,12 +66,12 @@ Line Loop(18)={-k0[0],-k1[0],-k2[0],-k3[0]};  Ruled Surface(18)={18} In Sphere{7
 
 
 // define domain
-Physical Surface(1)={ 1, 2, 3, 4, 5, 6,
-					  7, 8, 9,10,11,12,
-					 13,14,15,16,17,18};        // Domain 1 ( Combined surface )
+Physical Surface(1)={ 1, 2, 3, 4, 5, 6}; // Domain 1
+Physical Surface(2)={ 7, 8, 9,10,11,12}; // Domain 2
+Physical Surface(3)={13,14,15,16,17,18}; // Domain 3
 Physical Surface(99)={-1,-2,-3,-4,-5,-6,
-					  -7,-8,-9,-10,-11,-12,
-					  -13,-14,-15,-16,-17,-18}; // Domain 0 ( Open region )
+                      -7,-8,-9,-10,-11,-12,
+                      -13,-14,-15,-16,-17,-18}; // Domain 0 ( Open region )
 
 // transfinite interpolation 
 Transfinite Line{i0[0],i0[1],i0[2],

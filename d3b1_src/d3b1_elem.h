@@ -48,7 +48,7 @@ typedef struct domain_data {
   double rv[3],th;               // rotation parameter, rv:vector defining rotation axis ( rotation center is origin ), th:rotation angle 
   double tv[3];                  // translation vector. translation is applied after rotation.
 
-  int MN;             // number of medium
+  int MN;             // number of mediums
   double complex *n;  // complex refractive index of medium
   double complex *kn; // complex wave number of medium
 

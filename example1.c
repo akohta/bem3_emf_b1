@@ -4,8 +4,8 @@ int main(int argc,char *argv[])
 {
   DOMD md;
   double complex E[3],H[3];
-  double F[3],N[3],r[3],rc[3];
-  int type;
+  double F[3],N[3],r[3],rc[3],P;
+  int type,ret;
 
   dat_read_domd(argv[1],&md); // read datafile outputed by 'd3b1_bv_solver'
   print_domd(&md);            // print data 
@@ -35,7 +35,8 @@ int main(int argc,char *argv[])
   printf("Hx = % 15.14e %+15.14e I \n",creal(H[0]),cimag(H[0]));
   printf("Hy = % 15.14e %+15.14e I \n",creal(H[1]),cimag(H[1])); 
   printf("Hz = % 15.14e %+15.14e I \n",creal(H[2]),cimag(H[2]));  
-   
+  
+
   rc[0]=0.0;                  // set x coordinate of rotation center 
   rc[1]=0.0;                  // set y coordinate of rotation center 
   rc[2]=0.0;                  // set z coordinate of rotation center 
@@ -50,7 +51,21 @@ int main(int argc,char *argv[])
   force_FN(F,N,rc,type,&md);
   printf("F = (% 15.14e,% 15.14e,% 15.14e)\n",F[0],F[1],F[2]);
   printf("N = (% 15.14e,% 15.14e,% 15.14e), center of rotation (% g,% g,% g)\n",N[0],N[1],N[2],rc[0],rc[1],rc[2]); 
-  
+
+
+  printf("\nAbsorbed energy\n");
+  printf("type=0 setting ( 4 point Gauss-Legendre ) \n"); 
+  type=0;                     // select 4 point Gauss-Legendre
+  ret=absorb_P(&P,type,&md);
+  printf("P =% 15.14e\n",P);
+  if(ret<0) printf("loss of significance (catastrophic cancellation) occurred.\nThe absorbed energy is even smaller than the returned value.\n");
+  printf("type=1 setting ( 9 or 7 point Gauss-Legendre ) \n");
+  type=1;                     // select 9 or 7 point Gauss-Legendre
+  absorb_P(&P,type,&md);
+  printf("P =% 15.14e\n",P);
+  if(ret<0) printf("loss of significance (catastrophic cancellation) occurred.\nThe absorbed energy is even smaller than the returned value.\n");
+
+
   finalize_domd(&md);
   return 0;
 }
