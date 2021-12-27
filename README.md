@@ -10,11 +10,12 @@ The electromagnetic field analysis program "multi_fbeam" is used for analyze inc
 ## Usage of example code  
 
 1. type 'make' command to compile.  
-   The executable d3b1_bv_solver, example1.out, example2.out, example3.out are created. 
+   The executable d3b1_bv_solver, example1.out, example2.out, example3.out, example4.out are created. 
    The executable d3b1_bv_solver is the main solver of boundary integral equations. 
    The example1.out is the executable of source code example1.c, it shows a simplest example using "bem3_emf_b1". 
    The example2.out is the execubable of source code example2.c, it shows a example of electromagnetic field intensity analysis.
-   The example3.out is the executable of source code example3.c, it shows a example of outputting the instantaneous value of electromagnetic field as an image. 
+   The example3.out is the executable of source code example3.c, it shows a example of outputting the instantaneous value of electromagnetic field as an image.
+   The example4.out is the executable of source code example4.c, it shows a example of far-field intensity analysis.  
   
 2. type './d3b1_bv_solver' with arguments of medium datafile name, mesh datafile name and output dafafile name.  
    For example, './d3b1_bv_solver medium_data.txt sphere_m1.msh ex.dat'. 
@@ -51,6 +52,11 @@ The electromagnetic field analysis program "multi_fbeam" is used for analyze inc
    The range of color bar in each cross section is output to the info.txt file (ex. xy_info.txt for z=0 plane). 
    The xz_Ex.gif, yz_Ex.gif and xy_Ex.gif are animated gifs that concatenate the png files created by using the shell script gif_animation.sh.  
 
+6. type './example4.out' with an argument of datafile name output by d3b1_bv_solver.  
+   For example, './example4.out ex.dat'. 
+   This executable calculates far-field intensity distributions and outputs them to text files. 
+   The I_example4.png is the visualization result of electric field intensity distributions, created by gnuplot script gscript_example4.plt.
+
 Please see d3b1_src/bem3_emf_b1.h for detail of functions. 
 The main parts of the code are parallelized by using OpenMP. 
 The number of threads is controlled by the environment variable OMP_NUM_THREADS. 
@@ -61,7 +67,7 @@ The additional analysis examples are in the folder analysis_sample1 ~ analysis_s
 ![intensity distributions 0](I_example2.png "intensity distributions (I_example2.png)")
 ![xz_Ex.gif](xz_Ex.gif "instantaneous value of the E_x on y=0 plane (xz_Ex.gif)")![yz_Ex.gif](yz_Ex.gif "instantaneous value of the E_x on x=0 plane (yz_Ex.gif)")  
 ![xy_Ex.gif](xy_Ex.gif "instantaneous value of the E_x on z=0 plane (xy_Ex.gif)")  
-
+![far-field 0](I_example4.png "far-field intensity distributions (I_example4.png)")  
 
 ## Analysis sample 1 ( in the folder analysis_sample1 )  
 
@@ -72,6 +78,7 @@ This is the analysis result of plane wave scattering by the cone shaped metal.
 ![intensity distributions 1](analysis_sample1/I_example2.png "intensity distributions (analysis_sample1/I_example2.png)")  
 ![xz_Ex.gif 1](analysis_sample1/xz_Ex.gif "instantaneous value of the E_x on y=0 plane (analysis_sample1/xz_Ex.gif)")![yz_Ex.gif 1](analysis_sample1/yz_Ex.gif "instantaneous value of the E_x on x=0 plane (analysis_sample1/yz_Ex.gif)")  
 ![xy_Ex.gif 1](analysis_sample1/xy_Ex.gif "instantaneous value of the E_x on z=0 plane (analysis_sample1/xy_Ex.gif)")  
+![far-field 1](analysis_sample1/I_example4.png "far-field intensity distributions (analysis_sample1/I_example4.png)")  
 
 
 ## Verifications  
